@@ -1,0 +1,8 @@
+node_modules
+.env
+# Mezon cache
+/mezon-cache
+doc_development.txt
+/keys
+
+
