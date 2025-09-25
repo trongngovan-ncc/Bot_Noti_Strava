@@ -1,4 +1,4 @@
-const startRankingCron = require('./src/cron');
+// const startRankingCron = require('./src/cron');
 require('dotenv').config();
 const express = require('express');
 const { MezonClient } = require('mezon-sdk');
@@ -6,6 +6,7 @@ const registerHealthApi = require('./api/health');
 const handleIntro = require("./commands/intro");
 const handleLoginStrava = require("./commands/loginStrava");
 const handleMyActivities = require("./commands/myActivities");
+const handleList = require("./commands/list");
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -21,7 +22,7 @@ const db = new sqlite3.Database(dbPath);
 (async () => {
   const client = new MezonClient(APP_TOKEN);
   await client.login();
-  startRankingCron(client);
+  // startRankingCron(client);
   // Bot chat logic
   client.onChannelMessage(async (event) => {
     const text = event?.content?.t?.toLowerCase();
@@ -35,6 +36,9 @@ const db = new sqlite3.Database(dbPath);
     }
     if(text.startsWith("*myactivities")){
       return handleMyActivities(client, event);
+    }
+    if(text.startsWith("*list")){
+      return handleList(client, event);
     }
       
 
