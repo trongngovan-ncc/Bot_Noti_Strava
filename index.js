@@ -28,7 +28,7 @@ const db = new sqlite3.Database(dbPath);
     const text = event?.content?.t?.toLowerCase();
     if (!text) return;
 
-    if (text.startsWith("*intro")) {
+    if (text.startsWith("*intro_strava")) {
       return handleIntro(client, event);
     }
     if(text.startsWith("*loginstrava")){
@@ -37,7 +37,7 @@ const db = new sqlite3.Database(dbPath);
     if(text.startsWith("*myactivities")){
       return handleMyActivities(client, event);
     }
-    if(text.startsWith("*list")){
+    if(text.startsWith("*list_strava")){
       return handleList(client, event);
     }
       
