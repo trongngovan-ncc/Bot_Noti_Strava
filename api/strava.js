@@ -129,17 +129,46 @@ router.post('/webhook', express.json({ limit: '1mb' }), async (req, res) => {
       return;
     }
     // Fetch activity detail from Strava
+    let data;
+    let accessToken = athlete.access_token;
     try {
       const r = await axios.get(`https://www.strava.com/api/v3/activities/${object_id}`,
-        { headers: { Authorization: `Bearer ${athlete.access_token}` } });
-      const data = r.data;
-      // Upsert activity
+        { headers: { Authorization: `Bearer ${accessToken}` } });
+      data = r.data;
+    } catch (err) {
+      // Nếu lỗi 401, thử refresh token
+      if (err.response && err.response.status === 401 && athlete.refresh_token) {
+        try {
+          const refreshRes = await axios.post('https://www.strava.com/oauth/token', {
+            client_id: process.env.STRAVA_CLIENT_ID,
+            client_secret: process.env.STRAVA_CLIENT_SECRET,
+            grant_type: 'refresh_token',
+            refresh_token: athlete.refresh_token
+          });
+          accessToken = refreshRes.data.access_token;
+          // Lưu lại access_token và refresh_token mới vào DB
+          db.run(`UPDATE athletes SET access_token = ?, refresh_token = ?, token_expires_at = ? WHERE strava_athlete_id = ?`,
+            [refreshRes.data.access_token, refreshRes.data.refresh_token, new Date(refreshRes.data.expires_at * 1000).toISOString(), athlete.strava_athlete_id]
+          );
+          // Thử lại lấy activity
+          const r2 = await axios.get(`https://www.strava.com/api/v3/activities/${object_id}`,
+            { headers: { Authorization: `Bearer ${accessToken}` } });
+          data = r2.data;
+        } catch (err2) {
+          console.error('Error refreshing token or fetching activity:', err2?.response?.data || err2.message);
+          return;
+        }
+      } else {
+        console.error('Error fetching activity from Strava:', err?.response?.data || err.message);
+        return;
+      }
+    }
+    // Upsert activity nếu lấy được data
+    if (data) {
       db.run(`INSERT OR REPLACE INTO activities (activity_id, source, strava_athlete_id, sport_type, activity_name, distance_m, duration_s, start_date_local, timezone, private, deleted, created_at)
         VALUES (?, 'strava', ?, ?, ?, ?, ?, ?, ?, ?, 0, datetime('now'))`,
         [String(data.id), athlete.strava_athlete_id, data.type, data.name, data.distance, data.moving_time, data.start_date_local, data.timezone, data.private ? 1 : 0]
       );
-    } catch (err) {
-      console.error('Error fetching activity from Strava:', err?.response?.data || err.message);
     }
   });
 });
