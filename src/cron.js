@@ -7,7 +7,7 @@ const CHANNEL_ID = '1970022746041618432';
 
 module.exports = function startRankingCron(client) {
   
-  cron.schedule('*/1 * * * *', async () => {
+  cron.schedule('*/5 * * * *', async () => {
     const dbPath = path.join(__dirname, '../data', 'strava_bot.db');
     const db = new sqlite3.Database(dbPath);
     const channel = await client.channels.fetch(CHANNEL_ID);

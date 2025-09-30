@@ -6,7 +6,6 @@ const registerHealthApi = require('./api/health');
 const handleIntro = require("./commands/intro");
 const handleLoginStrava = require("./commands/loginStrava");
 const handleMyActivities = require("./commands/myActivities");
-const handleList = require("./commands/list");
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -36,9 +35,6 @@ const db = new sqlite3.Database(dbPath);
     }
     if(text.startsWith("*myactivities")){
       return handleMyActivities(client, event);
-    }
-    if(text.startsWith("*list_strava")){
-      return handleList(client, event);
     }
       
 
