@@ -18,9 +18,11 @@ const APP_TOKEN = process.env.APPLICATION_TOKEN;
 // SQLite DB setup (simple, inline for demo)
 const dbPath = path.join(__dirname, 'data', 'strava_bot.db');
 const db = new sqlite3.Database(dbPath);
+const BOT_TOKEN = process.env.APPLICATION_TOKEN;
+const BOT_ID = process.env.APPLICATION_ID;
 
 (async () => {
-  const client = new MezonClient(APP_TOKEN);
+  const client = new MezonClient({ botId: BOT_ID, token: BOT_TOKEN });
   await client.login();
   // startRankingCron(client);
   // Bot chat logic
