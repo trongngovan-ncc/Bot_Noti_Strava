@@ -5,6 +5,7 @@ const axios = require('axios');
 const puppeteer = require('puppeteer');
 const cloudinary = require('cloudinary').v2;
 
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -79,28 +80,47 @@ module.exports = async function handleLastActivity(client, event) {
       // 4. Lấy embed_token
       const embedToken = activity.embed_token;
       console.log('Embed token:', embedToken);
-      // 5. Dùng Puppeteer chụp ảnh embedded map
+      // 5. Dùng polyline để vẽ map và chụp ảnh bằng Puppeteer
+      const polyline = require('@mapbox/polyline');
       let mapImageUrl = '';
       try {
-        const browser = await puppeteer.launch({
-            headless: false,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-                    const page = await browser.newPage();
-        await page.setViewport({ width: 600, height: 405 });
-        const embedUrl = `https://www.strava.com/activities/${activityId}/embed/${embedToken}`;
-        await page.goto(embedUrl, { waitUntil: 'networkidle2' });
-        await page.waitForSelector('.activity-map img', { timeout: 6000 });
-        const imgElement = await page.$('.activity-map img');
-        await imgElement.screenshot({ path: 'strava_map_auto.png' });
-        console.log('Screenshot captured');
+        // Lấy polyline từ activity
+        const encodedPolyline = activity.map && activity.map.polyline;
+        if (!encodedPolyline) throw new Error('Không có polyline trong activity');
+        const coordinates = polyline.decode(encodedPolyline);
+        const leafletHtml = `<!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset=\"UTF-8\">
+          <title>Strava Activity Map</title>
+          <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet/dist/leaflet.css\" />
+          <style>#map { width: 800px; height: 600px; }</style>
+        </head>
+        <body>
+          <div id=\"map\"></div>
+          <script src=\"https://unpkg.com/leaflet/dist/leaflet.js\"></script>
+          <script>
+            const coordinates = ${JSON.stringify(coordinates)};
+            const map = L.map('map').setView(coordinates[0], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.polyline(coordinates, {color: 'red', weight: 4}).addTo(map);
+            map.fitBounds(coordinates);
+          </script>
+        </body>
+        </html>`;
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        const page = await browser.newPage();
+        await page.setViewport({ width: 800, height: 600 });
+        await page.setContent(leafletHtml, { waitUntil: 'networkidle0' });
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await page.screenshot({ path: 'activity_map_auto.png' });
         await browser.close();
-        // 6. Upload lên Cloudinary 
-        const uploadRes = await cloudinary.uploader.upload('strava_map_auto.png', { folder: 'strava-maps' });
+        // 6. Upload lên Cloudinary
+        const uploadRes = await cloudinary.uploader.upload('activity_map_auto.png', { folder: 'strava-maps' });
         mapImageUrl = uploadRes.secure_url;
-        console.log('Image uploaded to Cloudinary:', mapImageUrl);
+        console.log('Đã chụp ảnh bản đồ thành công!');
       } catch (err) {
-        console.error('Puppeteer/Cloudinary error:', err);
+        console.error('Puppeteer/polyline error:', err);
         mapImageUrl = '';
       }
 
