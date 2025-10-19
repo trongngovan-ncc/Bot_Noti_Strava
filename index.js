@@ -56,7 +56,7 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
   // API logic
   const app = express();  
   registerHealthApi(app);
-  app.use('/strava', stravaApi); // Mount all strava API under /strava
+  app.use('/strava', stravaApi(client)); // Mount all strava API under /strava
   app.listen(PORT, () => {
     console.log(`🚀 Bot listening on port ${PORT}`);
     
