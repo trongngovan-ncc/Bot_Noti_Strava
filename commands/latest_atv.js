@@ -36,7 +36,7 @@ module.exports = async function handleLastActivity(client, event) {
       const stravaAthleteId = userRow.strava_athlete_id;
 
       // 2. Dùng activity_id fix cứng
-      const activityId = '16190674564';
+      const activityId = '16186963028';
       let activity;
 
       // 3. Gọi API lấy chi tiết activity

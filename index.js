@@ -8,7 +8,6 @@ const handleLoginStrava = require("./commands/loginStrava");
 const handleMyActivities = require("./commands/myActivities");
 const handleRanking = require("./commands/ranking");
 const handleLastActivity = require("./commands/latest_atv");
-const testReplyFormat = require("./commands/test");
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
