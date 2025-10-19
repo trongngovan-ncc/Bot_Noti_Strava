@@ -82,8 +82,11 @@ module.exports = async function handleLastActivity(client, event) {
       // 5. Dùng Puppeteer chụp ảnh embedded map
       let mapImageUrl = '';
       try {
-        const browser = await puppeteer.launch({ headless: false });
-        const page = await browser.newPage();
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+                    const page = await browser.newPage();
         await page.setViewport({ width: 600, height: 405 });
         const embedUrl = `https://www.strava.com/activities/${activityId}/embed/${embedToken}`;
         await page.goto(embedUrl, { waitUntil: 'networkidle2' });
