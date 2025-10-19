@@ -12,7 +12,6 @@
     "body-parser": "^1.20.2",
     "bot_noti_starva": "file:",
     "bot_noti_strava": "file:",
-    "canvas": "^2.11.2",
     "cloudinary": "^2.7.0",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
