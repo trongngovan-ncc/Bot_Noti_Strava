@@ -7,10 +7,8 @@
     "dev": "nodemon index"
   },
   "dependencies": {
-    "@mapbox/polyline": "^1.2.1",
     "axios": "^1.11.0",
     "body-parser": "^1.20.2",
-    "bot_noti_starva": "file:",
     "bot_noti_strava": "file:",
     "cloudinary": "^2.7.0",
     "dotenv": "^16.4.5",
