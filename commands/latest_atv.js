@@ -115,16 +115,15 @@ module.exports = async function handleLastActivity(client, event) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         await page.screenshot({ path: `image/map/${activityId}.png` });
         await browser.close();
-        // // 6. Upload lên Cloudinary
-        // const uploadRes = await cloudinary.uploader.upload(`image/map/${activityId}.png`, { folder: 'strava-maps', public_id: `activity_map_${activityId}` });
-        // mapImageUrl = uploadRes.secure_url;
-        mapImageUrl = `https://botnotistrava-production.up.railway.app/data/map/${activityId}.png`; // Thay your_domain bằng domain thật của bạn
-        // // Xóa file ảnh tạm sau khi upload
-        // try {
-        //   require('fs').unlinkSync(`image/map/${activityId}.png`);
-        // } catch (e) {
-        //   console.warn('Không thể xóa file tạm:', e);
-        // }
+        // 6. Upload lên Cloudinary
+        const uploadRes = await cloudinary.uploader.upload(`image/map/${activityId}.png`, { folder: 'strava-maps', public_id: `activity_map_${activityId}` });
+        mapImageUrl = uploadRes.secure_url;
+        // Xóa file ảnh tạm sau khi upload
+        try {
+          require('fs').unlinkSync(`image/map/${activityId}.png`);
+        } catch (e) {
+          console.warn('Không thể xóa file tạm:', e);
+        }
         console.log('Đã chụp ảnh bản đồ thành công!');
       } catch (err) {
         console.error('Puppeteer/polyline error:', err);
