@@ -37,7 +37,7 @@ module.exports = async function handleLastActivity(client, event) {
       const stravaAthleteId = userRow.strava_athlete_id;
 
       // 2. Dùng activity_id fix cứng
-      const activityId = '16186963028';
+      const activityId = '16190674564';
       let activity;
 
       // 3. Gọi API lấy chi tiết activity
@@ -85,7 +85,7 @@ module.exports = async function handleLastActivity(client, event) {
       let mapImageUrl = '';
       try {
         // Lấy polyline từ activity
-        const encodedPolyline = activity.map && activity.map.polyline;
+        const encodedPolyline = activity.map.summary_polyline;
         if (!encodedPolyline) throw new Error('Không có polyline trong activity');
         const coordinates = polyline.decode(encodedPolyline);
         const leafletHtml = `<!DOCTYPE html>
@@ -113,11 +113,18 @@ module.exports = async function handleLastActivity(client, event) {
         await page.setViewport({ width: 800, height: 600 });
         await page.setContent(leafletHtml, { waitUntil: 'networkidle0' });
         await new Promise(resolve => setTimeout(resolve, 2000));
-        await page.screenshot({ path: 'activity_map_auto.png' });
+        await page.screenshot({ path: `image/map/${activityId}.png` });
         await browser.close();
-        // 6. Upload lên Cloudinary
-        const uploadRes = await cloudinary.uploader.upload('activity_map_auto.png', { folder: 'strava-maps' });
-        mapImageUrl = uploadRes.secure_url;
+        // // 6. Upload lên Cloudinary
+        // const uploadRes = await cloudinary.uploader.upload(`image/map/${activityId}.png`, { folder: 'strava-maps', public_id: `activity_map_${activityId}` });
+        // mapImageUrl = uploadRes.secure_url;
+        mapImageUrl = `https://botnotistrava-production.up.railway.app/data/map/${activityId}.png`; // Thay your_domain bằng domain thật của bạn
+        // // Xóa file ảnh tạm sau khi upload
+        // try {
+        //   require('fs').unlinkSync(`image/map/${activityId}.png`);
+        // } catch (e) {
+        //   console.warn('Không thể xóa file tạm:', e);
+        // }
         console.log('Đã chụp ảnh bản đồ thành công!');
       } catch (err) {
         console.error('Puppeteer/polyline error:', err);
