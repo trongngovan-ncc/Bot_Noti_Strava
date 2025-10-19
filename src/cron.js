@@ -3,11 +3,11 @@ const path = require('path');
 const cron = require('node-cron');
 
 // Thay bằng channel_id cố định của bạn
-const CHANNEL_ID = '1970022746041618432';
+const CHANNEL_ID = '1979045736288882688';
 
 module.exports = function startRankingCron(client) {
   
-  cron.schedule('*/5 * * * *', async () => {
+  cron.schedule('*/60 * * * *', async () => {
     const dbPath = path.join(__dirname, '../data', 'strava_bot.db');
     const db = new sqlite3.Database(dbPath);
     const channel = await client.channels.fetch(CHANNEL_ID);
