@@ -90,7 +90,7 @@ module.exports = async function handleLastActivity(client, event) {
         await page.setViewport({ width: 600, height: 405 });
         const embedUrl = `https://www.strava.com/activities/${activityId}/embed/${embedToken}`;
         await page.goto(embedUrl, { waitUntil: 'networkidle2' });
-        await page.waitForSelector('.activity-map img', { timeout: 3000 });
+        await page.waitForSelector('.activity-map img', { timeout: 7000 });
         const imgElement = await page.$('.activity-map img');
         await imgElement.screenshot({ path: 'strava_map_auto.png' });
         console.log('Screenshot captured');
