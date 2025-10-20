@@ -209,22 +209,20 @@ router.post('/webhook', express.json({ limit: '1mb' }), async (req, res) => {
         const imgPath = `activity_map_${data.id}.png`;
         await page.screenshot({ path: imgPath });
         await browser.close();
-        // Upload lên Cloudinary
         const uploadRes = await cloudinary.uploader.upload(imgPath, { folder: 'strava-maps', public_id: `activity_map_${data.id}` });
         mapImageUrl = uploadRes.secure_url;
-        // Xóa file tạm
         try { require('fs').unlinkSync(imgPath); } catch(e){}
       } catch (err) {
         console.error('Puppeteer/polyline error:', err);
         mapImageUrl = '';
       }
-      // Gửi thông báo lên channel cố định
+
       try {
         const client = clientGlobal;
-        const CHANNEL_ID = '1979045736288882688';
+        const CHANNEL_ID = '1978358966857502720';
         if (client) {
           const channel = await client.channels.fetch(CHANNEL_ID);
-          let msg = `🏅 Hoạt động mới của ${athlete.athlete_name || athlete.firstname || ''}:\n`;
+          let msg = `🏅 Chúc mừng ${athlete.athlete_name || athlete.firstname || ''} đã hoàn thành chặng đường thể dục thể thao:\n`;
           msg += `Tên: ${data.name}\nLoại: ${data.sport_type}\nQuãng đường: ${(data.distance/1000).toFixed(2)} km\nThời gian: ${(data.moving_time/60).toFixed(1)} phút\nNgày: ${data.start_date_local}\n`;
           const attachmentsArr = mapImageUrl ? [
             {

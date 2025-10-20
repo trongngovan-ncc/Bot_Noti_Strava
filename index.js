@@ -19,8 +19,8 @@ const APP_TOKEN = process.env.APPLICATION_TOKEN;
 
 const dbPath = path.join(__dirname, 'data', 'strava_bot.db');
 const db = new sqlite3.Database(dbPath);
-const BOT_TOKEN = process.env.APPLICATION_TOKEN_TEST;
-const BOT_ID = process.env.APPLICATION_ID_TEST;
+const BOT_TOKEN = process.env.APPLICATION_TOKEN;
+const BOT_ID = process.env.APPLICATION_ID;
 
 (async () => {
   const client = new MezonClient({ botId: BOT_ID, token: BOT_TOKEN });
