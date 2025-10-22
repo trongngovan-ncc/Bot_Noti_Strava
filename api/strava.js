@@ -47,6 +47,23 @@ router.get('/callback', async (req, res) => {
   if (!code || !state) {
     return res.status(400).send('Missing code or state');
   }
+  // Decode state trước khi verify JWT
+  const jwt = require('jsonwebtoken');
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+  let mezon_user_id = null;
+  let mezon_avatar = '';
+  let decodedToken = '';
+  try {
+    console.log('[Strava Callback] Raw state token:', state);
+    decodedToken = decodeURIComponent(state);
+    console.log('[Strava Callback] Decoded token:', decodedToken);
+    const decoded = jwt.verify(decodedToken, SECRET_KEY);
+    mezon_user_id = decoded.mezon_user_id;
+    mezon_avatar = decoded.mezon_avatar || '';
+  } catch (err) {
+    console.error('Invalid JWT token in state:', err);
+    return res.status(403).send('Invalid token in state');
+  }
   try {
     // Exchange code for tokens
     const tokenRes = await axios.post('https://www.strava.com/oauth/token', {
@@ -58,16 +75,16 @@ router.get('/callback', async (req, res) => {
     const { access_token, refresh_token, expires_at, athlete } = tokenRes.data;
     // Save to DB (upsert)
     db.run(
-      `INSERT OR REPLACE INTO athletes (strava_athlete_id, mezon_user_id, access_token, refresh_token, token_expires_at, athlete_name, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
-      [athlete.id, state, access_token, refresh_token, new Date(expires_at * 1000).toISOString(), `${athlete.firstname} ${athlete.lastname}`],
+      `INSERT OR REPLACE INTO athletes (strava_athlete_id, mezon_user_id, access_token, refresh_token, token_expires_at, athlete_name, mezon_avatar, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+      [athlete.id, mezon_user_id, access_token, refresh_token, new Date(expires_at * 1000).toISOString(), `${athlete.firstname} ${athlete.lastname}`, mezon_avatar],
       async (err) => {
         let webhookMsg = '';
         if (err) {
           console.error('DB error:', err);
           return res.status(500).send('Lỗi lưu thông tin user vào DB.');
         } else {
-          // Đăng ký webhook nếu chưa có
+
           const callbackUrl = `${process.env.STRAVA_WEBHOOK_URI}?token=${process.env.WEBHOOK_SECRET_TOKEN}`;
           const webhookRes = await ensureStravaWebhook(callbackUrl, process.env.WEBHOOK_SECRET_TOKEN);
           if (webhookRes.error) {
@@ -149,11 +166,11 @@ router.post('/webhook', express.json({ limit: '1mb' }), async (req, res) => {
             refresh_token: athlete.refresh_token
           });
           accessToken = refreshRes.data.access_token;
-          // Lưu lại access_token và refresh_token mới vào DB
+ 
           db.run(`UPDATE athletes SET access_token = ?, refresh_token = ?, token_expires_at = ? WHERE strava_athlete_id = ?`,
             [refreshRes.data.access_token, refreshRes.data.refresh_token, new Date(refreshRes.data.expires_at * 1000).toISOString(), athlete.strava_athlete_id]
           );
-          // Thử lại lấy activity
+
           const r2 = await axios.get(`https://www.strava.com/api/v3/activities/${object_id}`,
             { headers: { Authorization: `Bearer ${accessToken}` } });
           data = r2.data;
@@ -219,29 +236,80 @@ router.post('/webhook', express.json({ limit: '1mb' }), async (req, res) => {
 
       try {
         const client = clientGlobal;
-        const CHANNEL_ID = '1978358966857502720';
-        if (client) {
-          const channel = await client.channels.fetch(CHANNEL_ID);
-          let msg = `🏅 Chúc mừng ${athlete.athlete_name || athlete.firstname || ''} đã hoàn thành chặng đường thể dục thể thao:\n`;
-          msg += `Tên: ${data.name}\nLoại: ${data.sport_type}\nQuãng đường: ${(data.distance/1000).toFixed(2)} km\nThời gian: ${(data.moving_time/60).toFixed(1)} phút\nNgày: ${data.start_date_local}\n`;
-          const attachmentsArr = mapImageUrl ? [
-            {
-              filename: 'strava_map.png',
-              url: mapImageUrl,
-              filetype: 'image/png'
-            }
-          ] : [];
-          await channel.send({ t: msg, mk: [ { type: 'pre', s: 0, e: msg.length } ] }, [], attachmentsArr);
+        const CHANNEL_ID = '1969101240306503680';
+
+        // Build activity photos array safely
+        const activityPhotos = [];
+        if (data.photos) {
+          if (data.photos.primary && data.photos.primary.urls) {
+            const urls = data.photos.primary.urls;
+            const url = urls['600'] || Object.values(urls)[0];
+            if (url) activityPhotos.push(url);
+          }
+          if (Array.isArray(data.photos)) {
+            data.photos.forEach(p => {
+              if (p && p.urls && p.urls['600']) activityPhotos.push(p.urls['600']);
+            });
+          }
         }
+
+        // Prepare activity object
+        const avatarMezon = athlete.mezon_avatar || '';
+        const mezonUserId = athlete.mezon_user_id;
+        const stravaProfileUrl = `https://www.strava.com/athletes/${athlete.strava_athlete_id}`;
+
+        const activityObj = {
+          username: athlete.athlete_name || athlete.firstname || '',
+          name: data.name,
+          sport_type: data.sport_type || data.type || '',
+          distance: data.distance || 0,
+          moving_time: data.moving_time || 0,
+          start_date_local: data.start_date_local,
+          mapImageUrl,
+          photos: activityPhotos,
+          avatar: avatarMezon,
+          strava_url: `https://www.strava.com/activities/${data.id}`,
+          strava_profile_url: stravaProfileUrl,
+          mezon_user_id: mezonUserId,
+          activity_id: data.id
+        };
+
+        try {
+          // Send to channel (the implementation of the called function handles channel logic)
+          const sendStravaActivityToChannel = require('../commands/webhook');
+          await sendStravaActivityToChannel(client, activityObj, CHANNEL_ID, mezonUserId, athlete.athlete_name || athlete.firstname || '');
+        } catch (err) {
+          console.error('Gửi thông báo lên channel lỗi:', err);
+        }
+
+        // Lưu activity vào DB sau khi gửi thông báo
+        db.run(
+          `INSERT OR REPLACE INTO activities (
+            activity_id, source, strava_athlete_id, sport_type, activity_name, distance_m, duration_s, start_date_local, timezone, private, deleted, created_at, photo, map
+          ) VALUES (?, 'strava', ?, ?, ?, ?, ?, ?, ?, ?, 0, datetime('now'), ?, ?)`,
+          [
+            String(data.id),
+            athlete.strava_athlete_id,
+            data.type,
+            data.name,
+            data.distance,
+            data.moving_time,
+            data.start_date_local,
+            data.timezone,
+            data.private ? 1 : 0,
+            activityPhotos && activityPhotos.length > 0 ? activityPhotos[0] : null,
+            mapImageUrl
+          ],
+          (dbErr) => {
+            if (dbErr) console.error('DB insert activity error:', dbErr);
+          }
+        );
       } catch (err) {
-        console.error('Gửi thông báo lên channel lỗi:', err);
+        console.error('Error preparing or sending activity:', err);
       }
-      db.run(`INSERT OR REPLACE INTO activities (activity_id, source, strava_athlete_id, sport_type, activity_name, distance_m, duration_s, start_date_local, timezone, private, deleted, created_at)
-        VALUES (?, 'strava', ?, ?, ?, ?, ?, ?, ?, ?, 0, datetime('now'))`,
-        [String(data.id), athlete.strava_athlete_id, data.type, data.name, data.distance, data.moving_time, data.start_date_local, data.timezone, data.private ? 1 : 0]
-      );
     }
   });
+  
 });
 
   return router;

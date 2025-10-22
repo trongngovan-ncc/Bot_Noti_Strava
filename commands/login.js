@@ -1,11 +1,13 @@
 const { generateStravaConnectLink } = require('../utils/strava');
 
-module.exports = async function handleLoginStrava(client, event) {
+module.exports = async function handleLogin(client, event) {
   try {
     const channel = await client.channels.fetch(event.channel_id);
     const message = await channel.messages.fetch(event.message_id);
     const mezonUserId =  event.sender_id;
-    const loginLink = generateStravaConnectLink(mezonUserId);
+    const mezon_avatar = event.avatar;
+    const loginLink = generateStravaConnectLink(mezonUserId, mezon_avatar);
+    
     const header = `🔗 Đăng nhập Strava để kết nối tài khoản của bạn:`;
     await message.reply({
       t: header + '\n' + loginLink,

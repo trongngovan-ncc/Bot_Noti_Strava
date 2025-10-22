@@ -1,4 +1,4 @@
-module.exports = async function handleIntro(client, event) {
+module.exports = async function handleHelp(client, event) {
 
   try {
     const channel = await client.channels.fetch(event.channel_id);

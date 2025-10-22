@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-module.exports = async function handleMyActivities(client, event) {
+module.exports = async function handleMyActivity(client, event) {
   const mezonUserId = event.sender_id;
   const dbPath = path.join(__dirname, '../data', 'strava_bot.db');
   const db = new sqlite3.Database(dbPath);
