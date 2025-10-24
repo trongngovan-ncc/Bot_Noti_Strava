@@ -58,7 +58,7 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
       return handleTest(client, event);
     }
 
-    if(text === "*test_form") {
+    if(text === "*strava_daily") {
       return handleTestForm(client, event);
     }
   });
