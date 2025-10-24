@@ -8,14 +8,25 @@ module.exports = async function handleLogin(client, event) {
     const mezon_avatar = event.avatar;
     const loginLink = generateStravaConnectLink(mezonUserId, mezon_avatar);
     
-    const header = `🔗 Đăng nhập Strava để kết nối tài khoản của bạn:`;
-    await message.reply({
-      t: header + '\n' + loginLink,
-      mk: [
-        { type: 'lk', s: header.length + 1, e: header.length + 1 + loginLink.length }
-      ]
-
-    });
+		const embed = [
+			{
+				color: 0xf39c12,
+				title: '🔗 Đăng nhập Strava và ủy quyền cho Mezon bot',
+				url: loginLink,
+				author: {
+					name: event.display_name || event.username || "Mezon User",
+					icon_url: mezon_avatar,
+				},
+				thumbnail: { url: mezon_avatar || '' },
+				description: `⚠️ Link bên trên chỉ ủy quyền cho Mezon Bot đọc dữ liệu hoạt động của bạn!`,
+				timestamp: new Date().toISOString(),
+				footer: {
+					text: "Powered by Mezon Bot Strava",
+					icon_url: "https://d3nn82uaxijpm6.cloudfront.net/favicon-32x32.png"
+				}
+			}
+		];
+		await message.reply({ embed });
   } catch (err) {
     console.error(err);
   }
