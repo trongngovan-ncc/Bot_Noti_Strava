@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Strava Connected</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="https://mezon.ai/assets/favicon.ico" type="image/png">
+    <style>
+      body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: url('https://res.cloudinary.com/derzv88vp/image/upload/v1761268370/nen_q236k3.jpg') no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        background: rgba(255,255,255,0.92);
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(252,74,26,0.18);
+        padding: 40px 32px 32px 32px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        animation: fadeIn 1s;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: none; }
+      }
+      .icon {
+        width: 72px;
+        height: 72px;
+        margin-bottom: 12px;
+        display: block;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(252,74,26,0.15);
+      }
+      h1 {
+        color: #fc4a1a;
+        font-size: 2rem;
+        margin-bottom: 12px;
+      }
+      p {
+        color: #333;
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+      }
+      .note {
+        font-size: 0.95rem;
+        color: #888;
+        margin-top: 18px;
+      }
+      @media (max-width: 500px) {
+        .container { padding: 24px 8px; }
+        h1 { font-size: 1.3rem; }
+        .icon { font-size: 48px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px;">
+        <img class="icon" src="https://res.cloudinary.com/derzv88vp/image/upload/v1761268552/strava_qgauau.png" alt="Strava Icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" style="flex-shrink:0;" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 20 H28 M22 14 L28 20 L22 26" stroke="#fc4a1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <img class="icon" src="https://res.cloudinary.com/derzv88vp/image/upload/v1761268379/mezon_fkjrx1.png" alt="Mezon Icon">
+      </div>
+      <h1>Kết nối Strava thành công!</h1>
+      <p id="athlete-info"></p>
+      <div id="webhook-msg"></div>
+      <p class="note">Bạn có thể đóng trang này và quay lại Mezon.</p>
+    </div>
+  </body>
+</html>

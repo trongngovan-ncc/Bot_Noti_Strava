@@ -1,4 +1,4 @@
-const { generateStravaConnectLink } = require('../utils/strava');
+const { generateStravaConnectLink } = require('../handler/oauth_url');
 
 module.exports = async function handleLogin(client, event) {
   try {
@@ -20,3 +20,5 @@ module.exports = async function handleLogin(client, event) {
     console.error(err);
   }
 }
+
+

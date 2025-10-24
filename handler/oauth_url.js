@@ -10,7 +10,6 @@ function generateStravaConnectLink(mezonUserId, mezon_avatar) {
     mezon_avatar: mezon_avatar
   };
   const token = generateToken(tokenPayload);
-  // Truyền token qua state (hoặc query) để xác thực sau này
   const state = encodeURIComponent(token);
   return `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
 }

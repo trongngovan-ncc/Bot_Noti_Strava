@@ -4,6 +4,22 @@ module.exports = async function sendStravaActivityToChannel(client, activity, ch
     const offset = 0;
     const mentionsArr = [{ user_id: mentionUserId, s: offset, e: mentionTag.length }];
 
+ 
+    let thumbnailObj = {};
+    if (activity.photos && Array.isArray(activity.photos) && activity.photos.length > 0 && activity.photos[0]) {
+        thumbnailObj = { url: activity.photos[0] };
+    }
+
+    let imageObj = {};
+    let mapField = {};
+    if (activity.mapImageUrl && typeof activity.mapImageUrl === 'string' && activity.mapImageUrl.trim() !== '') {
+        imageObj = { url: activity.mapImageUrl };
+        mapField = { name: "Bản đồ quá trình hoạt động", value: "", inline: false };
+    } else {
+        imageObj = {};
+        mapField = { name: "Bản đồ quá trình hoạt động", value: "Hoạt động này chưa có bản đồ theo dõi!", inline: false };
+    }
+
     const embed = {
         color: "#f39c12",
         title: `🚴 Hoạt động mới của ${activity.username} -- Link hoạt động`,
@@ -22,11 +38,9 @@ module.exports = async function sendStravaActivityToChannel(client, activity, ch
             `📅 Date: ${activity.start_date_local}`,
             "```"
         ].join('\n'),
-        thumbnail: { url: activity.photos?.[0] || '' },
-        fields: [
-            { name: "Bản đồ quá trình hoạt động", value: ``, inline: false }
-        ],
-        image: { url: activity.mapImageUrl },
+        thumbnail: thumbnailObj,
+        fields: [mapField],
+        image: imageObj,
         timestamp: new Date().toISOString(),
         footer: {
             text: "Powered by Mezon Bot Strava",

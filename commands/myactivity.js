@@ -7,7 +7,7 @@ module.exports = async function handleMyActivity(client, event) {
   const db = new sqlite3.Database(dbPath);
   const channel = await client.channels.fetch(event.channel_id);
   const message = await channel.messages.fetch(event.message_id);
-  // Lấy tên user từ bảng athletes
+
   db.get(
     `SELECT athlete_name FROM athletes WHERE mezon_user_id = ? LIMIT 1`,
     [mezonUserId],
@@ -36,7 +36,7 @@ module.exports = async function handleMyActivity(client, event) {
             db.close();
             return;
           }
-          // Header ngoài mk, thêm icon danh sách
+
           const header = `📋🏃‍♂️ Danh sách hoạt động gần đây của ${username}:`;
           let list = '';
           rows.forEach((act, idx) => {

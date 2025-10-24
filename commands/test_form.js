@@ -11,7 +11,7 @@ module.exports = async function handleTestForm(client, event) {
             name: 'Tên hoạt động:',
             value: '',
             inputs: {
-              id: `strava-${messageid}-name`,
+              id: `input-name-${messageid}`,
               type: EMessageComponentType.INPUT,
               component: {
                 placeholder: 'Nhập tên hoạt động...',
@@ -25,7 +25,7 @@ module.exports = async function handleTestForm(client, event) {
             name: 'Loại hoạt động:',
             value: '',
             inputs: {
-              id: `strava-${messageid}-type`,
+              id: `input-type-${messageid}`,
               type: EMessageComponentType.SELECT,
               component: {
                 options: [
@@ -43,7 +43,7 @@ module.exports = async function handleTestForm(client, event) {
             name: 'Thời gian (phút):',
             value: '',
             inputs: {
-              id: `strava-${messageid}-time`,
+              id: `input-time-${messageid}`,
               type: EMessageComponentType.INPUT,
               component: {
                 placeholder: 'Nhập thời gian...',
@@ -58,7 +58,7 @@ module.exports = async function handleTestForm(client, event) {
             name: 'Khoảng cách (km):',
             value: '',
             inputs: {
-              id: `strava-${messageid}-distance`,
+              id: `input-distance-${messageid}`,
               type: EMessageComponentType.INPUT,
               component: {
                 placeholder: 'Nhập khoảng cách...',
@@ -73,7 +73,7 @@ module.exports = async function handleTestForm(client, event) {
             name: 'Ghi chú:',
             value: '',
             inputs: {
-              id: `strava-${messageid}-note`,
+              id: `input-note-${messageid}`,
               type: EMessageComponentType.INPUT,
               component: {
                 placeholder: 'Thêm ghi chú...',
@@ -91,12 +91,12 @@ module.exports = async function handleTestForm(client, event) {
         }
       }
     ];
-    // Nút Submit/Cancel
+   
     const components = [
       {
         components: [
           {
-            id: `strava_${messageid}_cancel`,
+            id: `button-cancel-${messageid}`,
             type: EMessageComponentType.BUTTON,
             component: {
               label: 'Cancel',
@@ -104,7 +104,7 @@ module.exports = async function handleTestForm(client, event) {
             }
           },
           {
-            id: `strava_${messageid}_submit`,
+            id: `button-submit-${messageid}`,
             type: EMessageComponentType.BUTTON,
             component: {
               label: 'Submit',
