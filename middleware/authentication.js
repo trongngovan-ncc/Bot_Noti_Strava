@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
-// Middleware: verify token
+
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -14,7 +14,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// Function: generate token
+
 function generateToken(payload) {
     return jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
 }
