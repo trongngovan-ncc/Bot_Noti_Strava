@@ -7,8 +7,9 @@ const handleHelp = require("./commands/help");
 const handleLogin = require("./commands/login");
 const handleMyActivity = require("./commands/myactivity");
 const handleRanking = require("./commands/ranking");
-const handleTest = require("./commands/test_message");
-const handleTestForm = require("./commands/test_form");
+const handleDailyLog = require("./commands/daily_log");
+const handleRegister = require("./commands/register");
+const submitManualActivity = require('./handler/activity_manual');
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -29,10 +30,8 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
   await client.login();
 
   client.onMessageButtonClicked(async (ev) => {
-    console.log('button click event:', ev);
     const buttonId = ev.button_id || '';
     if (buttonId.startsWith('button-submit-') || buttonId.startsWith('button-cancel-')) {
-      const submitManualActivity = require('./handler/activity_manual');
       await submitManualActivity(client, ev);
     }
   });
@@ -54,13 +53,14 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
       return handleRanking(client, event);
     }
 
-    if(text === "*test") {
-      return handleTest(client, event);
+    if(text === "*strava_daily") {
+      return handleDailyLog(client, event);
     }
 
-    if(text === "*strava_daily") {
-      return handleTestForm(client, event);
+    if(text === "*strava_register"){
+      return handleRegister(client, event);
     }
+    
   });
 
   const app = express();  

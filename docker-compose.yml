@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  botnotistrava:
+    build: .
+    container_name: botnotistrava
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      # Add other env vars as needed, or use .env file
+    volumes:
+      - ./data:/app/data
+      - ./mezon-cache:/app/mezon-cache
+    restart: unless-stopped

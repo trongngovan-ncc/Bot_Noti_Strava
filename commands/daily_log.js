@@ -1,11 +1,15 @@
-module.exports = async function handleTestForm(client, event) {
-    // Import enum từ mezon-sdk
+module.exports = async function handleDailyLog(client, event) {
     const { EButtonMessageStyle, EMessageComponentType } = require('mezon-sdk');
     const messageid = event.message_id;
     const embed = [
       {
         color: 0x00bfff,
-        title: 'Nhập hoạt động manual cho Strava',
+        title: '📝 Nhập hoạt động manual cho Strava',
+        author: {
+          name: event.display_name || event.username || "Mezon User",
+          icon_url: event.avatar,
+        },
+        thumbnail: { url: event.avatar || '' },
         fields: [
           {
             name: 'Tên hoạt động:',
@@ -29,13 +33,17 @@ module.exports = async function handleTestForm(client, event) {
               type: EMessageComponentType.SELECT,
               component: {
                 options: [
-                  { label: 'Run', value: 'run' },
-                  { label: 'Ride', value: 'ride' },
-                  { label: 'Swim', value: 'swim' },
-                  { label: 'Walk', value: 'walk' }
+                  { label: '🏃‍♂️ Running', value: 'Run' },
+                  { label: '🚴‍♂️ Bike', value: 'Bike' },
+                  { label: '🏊‍♂️ Swimming', value: 'Swim' },
+                  { label: '🚶‍♂️ Walk', value: 'Walk' },
+                  { label: '🥾 Hiking', value: 'Hiking' },
+                  { label: '🏸 Badminton', value: 'Badminton' },
+                  { label: '🎾 Tennis', value: 'Tennis' },
+                  { label: '🥒 Pickleball', value: 'Pickleball' }
                 ],
                 required: true,
-                valueSelected: { label: 'Run', value: 'run' }
+                valueSelected: { label: '🏃‍♂️ Running', value: 'Run' }
               }
             }
           },
@@ -65,20 +73,6 @@ module.exports = async function handleTestForm(client, event) {
                 required: true,
                 textarea: false,
                 type: 'number',
-                defaultValue: ''
-              }
-            }
-          },
-          {
-            name: 'Ghi chú:',
-            value: '',
-            inputs: {
-              id: `input-note-${messageid}`,
-              type: EMessageComponentType.INPUT,
-              component: {
-                placeholder: 'Thêm ghi chú...',
-                required: false,
-                textarea: true,
                 defaultValue: ''
               }
             }
@@ -114,7 +108,7 @@ module.exports = async function handleTestForm(client, event) {
         ]
       }
     ];
-    // Gửi message
+ 
     const channelId = event.channel_id;
     const channel = await client.channels.fetch(channelId);
     const message = await channel.messages.fetch(event.message_id);

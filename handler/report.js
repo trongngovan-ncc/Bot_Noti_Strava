@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const cron = require('node-cron');
 
-// Thay bằng channel_id cố định của bạn
+
 const CHANNEL_ID = '1979045736288882688';
 
 module.exports = function startRankingCron(client) {
@@ -12,7 +12,6 @@ module.exports = function startRankingCron(client) {
     const db = new sqlite3.Database(dbPath);
     const channel = await client.channels.fetch(CHANNEL_ID);
 
-    // User đi dài nhất
     db.get(
       `SELECT ath.athlete_name, SUM(a.distance_m) as total_distance
        FROM athletes ath JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
@@ -20,7 +19,7 @@ module.exports = function startRankingCron(client) {
        GROUP BY ath.athlete_name ORDER BY total_distance DESC LIMIT 1`,
       [],
       (err, longestRow) => {
-        // User lâu nhất
+
         db.get(
           `SELECT ath.athlete_name, SUM(a.duration_s) as total_duration
            FROM athletes ath JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
@@ -28,7 +27,7 @@ module.exports = function startRankingCron(client) {
            GROUP BY ath.athlete_name ORDER BY total_duration DESC LIMIT 1`,
           [],
           (err2, longestTimeRow) => {
-            // User nhiều hoạt động nhất
+
             db.get(
               `SELECT ath.athlete_name, COUNT(a.activity_id) as total_acts
                FROM athletes ath JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
