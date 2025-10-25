@@ -1,4 +1,4 @@
-// const startRankingCron = require('./handler/report');
+const startRankingCron = require('./handler/cronjob');
 require('dotenv').config();
 const express = require('express');
 const { MezonClient } = require('mezon-sdk');
@@ -9,7 +9,10 @@ const handleMyActivity = require("./commands/myactivity");
 const handleRanking = require("./commands/ranking");
 const handleDailyLog = require("./commands/daily_log");
 const handleRegister = require("./commands/register");
+const handleReportFilter = require("./commands/report_filter");
 const submitManualActivity = require('./handler/activity_manual');
+const viewReportActivity = require('./handler/report');
+const handleTest = require("./commands/test");
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -28,11 +31,14 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
 (async () => {
   const client = new MezonClient({ botId: BOT_ID, token: BOT_TOKEN});
   await client.login();
-
+  startRankingCron(client);
   client.onMessageButtonClicked(async (ev) => {
     const buttonId = ev.button_id || '';
     if (buttonId.startsWith('button-submit-') || buttonId.startsWith('button-cancel-')) {
       await submitManualActivity(client, ev);
+    }
+    if (buttonId.startsWith('button-report-view') || buttonId.startsWith('button-report-cancel') ) {
+      await viewReportActivity(client, ev);
     }
   });
 
@@ -59,6 +65,14 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
 
     if(text === "*strava_register"){
       return handleRegister(client, event);
+    }
+    
+    if(text === "*strava_report"){
+      return handleReportFilter(client, event);
+    }
+
+    if(text === "*test"){
+     return handleTest(client, event);
     }
     
   });

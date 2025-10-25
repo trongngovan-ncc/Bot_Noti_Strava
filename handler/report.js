@@ -1,52 +1,139 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const cron = require('node-cron');
+const { EButtonMessageStyle, EMessageComponentType } = require('mezon-sdk');
+module.exports = async function viewReportActivity(client, ev) {
+  const buttonId = ev.button_id || '';
+  const messageId = ev.message_id;
+  const channelId = ev.channel_id;
+  let formData = ev.extra_data || {};
+  if (typeof formData === 'string') {
+    try {
+      formData = JSON.parse(formData);
+    } catch (e) {
+      formData = {};
+    }
+  }
+  const timeKey = Object.keys(formData).find(k => k.startsWith('filter-report-time'));
+  const typeKey = Object.keys(formData).find(k => k.startsWith('filter-report-type'));
 
 
-const CHANNEL_ID = '1979045736288882688';
+  const channel = await client.channels.fetch(channelId);
+  const message = await channel.messages.fetch(messageId);
 
-module.exports = function startRankingCron(client) {
-  
-  cron.schedule('*/60 * * * *', async () => {
-    const dbPath = path.join(__dirname, '../data', 'strava_bot.db');
-    const db = new sqlite3.Database(dbPath);
-    const channel = await client.channels.fetch(CHANNEL_ID);
+  if (buttonId.startsWith('button-report-view')) {
 
-    db.get(
-      `SELECT ath.athlete_name, SUM(a.distance_m) as total_distance
-       FROM athletes ath JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
-       WHERE (a.deleted IS NULL OR a.deleted = 0)
-       GROUP BY ath.athlete_name ORDER BY total_distance DESC LIMIT 1`,
-      [],
-      (err, longestRow) => {
 
-        db.get(
-          `SELECT ath.athlete_name, SUM(a.duration_s) as total_duration
-           FROM athletes ath JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
-           WHERE (a.deleted IS NULL OR a.deleted = 0)
-           GROUP BY ath.athlete_name ORDER BY total_duration DESC LIMIT 1`,
-          [],
-          (err2, longestTimeRow) => {
+      const dbPath = path.join(__dirname, '../data/strava_bot.db');
+      const db = new sqlite3.Database(dbPath);
 
-            db.get(
-              `SELECT ath.athlete_name, COUNT(a.activity_id) as total_acts
-               FROM athletes ath JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
-               WHERE (a.deleted IS NULL OR a.deleted = 0)
-               GROUP BY ath.athlete_name ORDER BY total_acts DESC LIMIT 1`,
-              [],
-              async (err3, mostActsRow) => {
-                let msg = '🏆 BẢNG XẾP HẠNG STRAVA 5 PHÚT GẦN NHẤT\n';
-                if (longestRow) msg += `🥇 Đi dài nhất: ${longestRow.athlete_name} (${(longestRow.total_distance/1000).toFixed(2)} km)\n`;
-                if (longestTimeRow) msg += `⏱️ Lâu nhất: ${longestTimeRow.athlete_name} (${(longestTimeRow.total_duration/60).toFixed(1)} phút)\n`;
-                if (mostActsRow) msg += `🔢 Nhiều hoạt động nhất: ${mostActsRow.athlete_name} (${mostActsRow.total_acts} hoạt động)\n`;
-                if (!longestRow && !longestTimeRow && !mostActsRow) msg += 'Chưa có dữ liệu.';
-                await channel.send({ t: msg, mk: [ { type: 'pre', s: 0, e: msg.length } ] });
-                db.close();
-              }
-            );
-          }
-        );
+      const time_range = formData[timeKey];
+      const sport_type = formData[typeKey];
+      let start_time, end_time;
+      const now = new Date();
+      switch (time_range) {
+        case 'Yesterday':
+          start_time = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 0, 0, 0);
+          end_time = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+          break;
+        case 'Last Week':
+          const dayOfWeek = now.getDay();
+          start_time = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek - 7, 0, 0, 0);
+          end_time = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek, 0, 0, 0);
+          break;
+        case 'Last Month':
+          start_time = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
+          end_time = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+          break;
+        case 'Last Year':
+          start_time = new Date(now.getFullYear() - 1, 0, 1, 0, 0, 0);
+          end_time = new Date(now.getFullYear(), 0, 1, 0, 0, 0);
+          break;
+        default:
+          start_time = null;
+          end_time = null;
       }
-    );
-  });
+
+      let query = `SELECT a.mezon_user_id, a.athlete_name, a.strava_athlete_id, a.mezon_avatar, SUM(act.distance_m) as total_distance, SUM(act.duration_s) as total_duration, COUNT(act.activity_id) as total_activities
+                   FROM athletes a
+                   JOIN activities act ON a.strava_athlete_id = act.strava_athlete_id
+                   WHERE act.deleted IS NULL OR act.deleted = 0`;
+      let params = [];
+      if (sport_type && sport_type !== 'All') {
+        query += ' AND act.sport_type = ?';
+        params.push(sport_type);
+      }
+      if (start_time && end_time) {
+        query += ' AND act.start_date_local >= ? AND act.start_date_local < ?';
+        params.push(start_time.toISOString());
+        params.push(end_time.toISOString());
+      }
+      query += ' GROUP BY a.mezon_user_id, a.athlete_name, a.strava_athlete_id, a.mezon_avatar ORDER BY total_distance DESC';
+
+      db.all(query, params, async (err, rows) => {
+        if (err) {
+          await message.update({ t: `❌ Lỗi truy vấn thống kê: ${err.message}` });
+          db.close();
+          return;
+        }
+        if (!rows || rows.length === 0) {
+          await message.update({ t: 'Không có dữ liệu hoạt động phù hợp với bộ lọc.' });
+          db.close();
+          return;
+        }
+        const embed = [
+          {
+            color: 0x00bfff,
+            title: `📊 Báo cáo hoạt động Strava (${sport_type || 'All'}) - ${time_range}`,
+            description: rows.map((row, idx) => [
+              `${idx + 1} ${row.athlete_name}`,
+              `🏅 Tổng quãng đường: ${(row.total_distance/1000).toFixed(2)} km`,
+              `⏱️ Tổng thời gian: ${(row.total_duration/60).toFixed(1)} phút`,
+              `🔢 Số hoạt động: ${row.total_activities}`
+            ].join('\n')).join('\n\n'),
+            timestamp: new Date().toISOString(),
+            footer: {
+              text: 'Powered by Mezon Bot Strava',
+              icon_url: 'https://d3nn82uaxijpm6.cloudfront.net/favicon-32x32.png'
+            }
+          }
+        ];
+        const components = [
+            {
+                components: [
+                {
+                    id: `button-sort-distance-${messageId}`,
+                    type: EMessageComponentType.BUTTON,
+                    component: {
+                    label: 'Sort by Distance',
+                    style: EButtonMessageStyle.SUCCESS
+                    }
+                },
+                {
+                    id: `button-sort-duration-${messageId}`,
+                    type: EMessageComponentType.BUTTON,
+                    component: {
+                    label: 'Sort by Duration',
+                    style: EButtonMessageStyle.SUCCESS
+                    }
+                },
+                {
+                    id: `button-sort-number-${messageId}`,
+                    type: EMessageComponentType.BUTTON,
+                    component: {
+                    label: 'Sort by Number',
+                    style: EButtonMessageStyle.SUCCESS
+                    }
+                }
+                ]
+            }
+        ];
+
+        await message.update({ embed, components });
+        db.close();
+      });
+  } else if (buttonId.startsWith('button-cancel-')) {
+    await message.update({
+      t: '⛔️ Đã hủy xem báo cáo.'
+    });
+  }
 }
