@@ -12,7 +12,6 @@ const handleRegister = require("./commands/register");
 const handleReportFilter = require("./commands/report_filter");
 const submitManualActivity = require('./handler/activity_manual');
 const viewReportActivity = require('./handler/report');
-const handleTest = require("./commands/test");
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
