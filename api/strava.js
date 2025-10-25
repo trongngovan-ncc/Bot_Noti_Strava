@@ -155,6 +155,23 @@ function createStravaRouter(client) {
 
     const { object_id, owner_id, aspect_type } = event;
     db.get(
+      "SELECT activity_id FROM activities WHERE activity_id = ?",
+      [object_id],
+      (err, row) => {
+        if (err) {
+          console.error("DB error checking existing activity:", err);
+          return;
+        }
+        if (row && row.activity_id) {
+          console.log(
+            "Activity already exists in DB, skipping:",
+            row.activity_id
+          );
+          return;
+        }
+      }
+    );
+    db.get(
       "SELECT * FROM athletes WHERE strava_athlete_id = ?",
       [owner_id],
       async (err, athlete) => {
