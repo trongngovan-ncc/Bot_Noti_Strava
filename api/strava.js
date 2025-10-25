@@ -142,6 +142,7 @@ function createStravaRouter(client) {
   });
 
   router.post("/webhook", express.json({ limit: "1mb" }), async (req, res) => {
+    console.log("Received Strava webhook event:", req.body);
     res.status(200).send("ok");
 
     const token = req.query.token;
