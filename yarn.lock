@@ -1227,12 +1227,12 @@ body-parser@1.20.3, body-parser@^1.20.2:
     "@mapbox/polyline" "^1.2.1"
     axios "^1.11.0"
     body-parser "^1.20.2"
-    bot_noti_strava "file:C:/Users/MEDIAMART PHU SON/AppData/Local/Yarn/Cache/v6/npm-bot-noti-strava-1.0.0-19fd0ac4-d0af-4cc6-9054-93653148fe7e-1761132906515/node_modules/bot_noti_strava"
+    bot_noti_strava "file:C:/Users/MEDIAMART PHU SON/AppData/Local/Yarn/Cache/v6/npm-bot-noti-strava-1.0.0-bf641a75-d1bf-403e-9346-5a48690b417e-1761367472670/node_modules/bot_noti_strava"
     cloudinary "^2.7.0"
     dotenv "^16.4.5"
     express "^4.18.2"
     jsonwebtoken "^9.0.2"
-    mezon-sdk "^2.8.22"
+    mezon-sdk "^2.8.23"
     node-cron "^4.2.1"
     puppeteer "^24.25.0"
     sqlite3 "^5.1.6"
@@ -2399,7 +2399,7 @@ fs.realpath@^1.0.0:
 
 fsevents@^2.1.2, fsevents@~2.3.2:
   version "2.3.3"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 function-bind@^1.1.2:
@@ -3884,10 +3884,10 @@ methods@~1.1.2:
   resolved "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz"
   integrity sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==
 
-mezon-sdk@^2.8.22:
-  version "2.8.22"
-  resolved "https://registry.npmjs.org/mezon-sdk/-/mezon-sdk-2.8.22.tgz"
-  integrity sha512-Y0TawkZLipVu/LxPRcreVPUaf+efci5251b80rsE6Kem5aVbaPgc+sk/u2Vr5jxXpmaEUALr3CkJLC8IOkB9jQ==
+mezon-sdk@^2.8.23:
+  version "2.8.23"
+  resolved "https://registry.npmjs.org/mezon-sdk/-/mezon-sdk-2.8.23.tgz"
+  integrity sha512-q9oEjZfh1/xyYndt9u0rZwDYQB/oAZ1xvOOliU1BfcG0CzoC235mrP20/q90GMoWHXVZbjevgkWTV2AKOW4+cg==
   dependencies:
     "@types/ws" "^8.5.12"
     base64-arraybuffer "^1.0.2"

@@ -37,7 +37,7 @@ module.exports = async function handleMyActivity(client, event) {
             return;
           }
 
-          const header = `📋🏃‍♂️ Danh sách hoạt động gần đây của ${username}:`;
+          const header = `📋🏃‍♂️ Danh sách 10 hoạt động mới nhất của ${username}:`;
           let list = '';
           rows.forEach((act, idx) => {
             const icon = act.sport_type === 'Run' ? '🏃‍♂️' : act.sport_type === 'Ride' ? '🚴‍♂️' : '🏅';

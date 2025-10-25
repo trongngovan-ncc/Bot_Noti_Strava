@@ -1,10 +1,10 @@
-module.exports = async function handleDailyLog(client, event) {
+module.exports = async function handleReportFilter(client, event) {
     const { EButtonMessageStyle, EMessageComponentType } = require('mezon-sdk');
     const messageid = event.message_id;
     const embed = [
       {
         color: 0x00bfff,
-        title: '📝 Nhập hoạt động manual cho Strava',
+        title: '📝 Lọc báo cáo hoạt động Strava theo:',
         author: {
           name: event.display_name || event.username || "Mezon User",
           icon_url: event.avatar,
@@ -12,27 +12,14 @@ module.exports = async function handleDailyLog(client, event) {
         thumbnail: { url: event.avatar || '' },
         fields: [
           {
-            name: 'Tên hoạt động:',
-            value: '',
-            inputs: {
-              id: `input-name-${messageid}`,
-              type: EMessageComponentType.INPUT,
-              component: {
-                placeholder: 'Nhập tên hoạt động...',
-                required: true,
-                textarea: false,
-                defaultValue: ''
-              }
-            }
-          },
-          {
             name: 'Loại hoạt động:',
             value: '',
             inputs: {
-              id: `input-type-${messageid}`,
+              id: `filter-report-type-${messageid}`,
               type: EMessageComponentType.SELECT,
               component: {
                 options: [
+                  {label: ' 🏃‍♂️ All', value: 'All'},
                   { label: '🏃‍♂️ Running', value: 'Run' },
                   { label: '🚴‍♂️ Bike', value: 'Bike' },
                   { label: '🏊‍♂️ Swimming', value: 'Swim' },
@@ -44,37 +31,30 @@ module.exports = async function handleDailyLog(client, event) {
                   { label: '🥒 Pickleball', value: 'Pickleball' }                
                 ],
                 required: true,
-                valueSelected: { label: '🏃‍♂️ Running', value: 'Run' }
+                valueSelected: { label: '🏃‍♂️ All', value: 'All' }
               }
             }
           },
           {
-            name: 'Thời gian (phút):',
+            name: 'Thời gian thống kê:',
             value: '',
             inputs: {
-              id: `input-time-${messageid}`,
-              type: EMessageComponentType.INPUT,
+              id: `filter-report-time-${messageid}`,
+              type: EMessageComponentType.SELECT,
               component: {
-                placeholder: 'Nhập thời gian...',
+                options: [
+                  {label: 'Từ trước đến nay', value: 'All'},
+                  { label: 'Hôm nay', value: 'Today' },
+                  { label: 'Hôm qua', value: 'Yesterday' },
+                  { label: 'Tuần này', value: 'This Week' },
+                  { label: 'Tuần trước', value: 'Last Week' },
+                  { label: 'Tháng này', value: 'This Month' },
+                  { label: 'Tháng trước', value: 'Last Month' },
+                  { label: 'Năm nay', value: 'This Year' },
+                  { label: 'Năm ngoái', value: 'Last Year' }
+                ],
                 required: true,
-                textarea: false,
-                type: 'number',
-                defaultValue: ''
-              }
-            }
-          },
-          {
-            name: 'Khoảng cách (km):',
-            value: '',
-            inputs: {
-              id: `input-distance-${messageid}`,
-              type: EMessageComponentType.INPUT,
-              component: {
-                placeholder: 'Nhập khoảng cách...',
-                required: true,
-                textarea: false,
-                type: 'number',
-                defaultValue: ''
+                valueSelected: { label: 'Từ trước đến nay', value: 'All' }
               }
             }
           }
@@ -91,7 +71,7 @@ module.exports = async function handleDailyLog(client, event) {
       {
         components: [
           {
-            id: `button-cancel-${messageid}`,
+            id: `button-report-cancel-${messageid}`,
             type: EMessageComponentType.BUTTON,
             component: {
               label: 'Cancel',
@@ -99,10 +79,10 @@ module.exports = async function handleDailyLog(client, event) {
             }
           },
           {
-            id: `button-submit-${messageid}`,
+            id: `button-report-view-${messageid}`,
             type: EMessageComponentType.BUTTON,
             component: {
-              label: 'Submit',
+              label: 'View Report',
               style: EButtonMessageStyle.SUCCESS
             }
           }
