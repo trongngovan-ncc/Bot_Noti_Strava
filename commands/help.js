@@ -13,10 +13,11 @@ module.exports = async function handleHelp(client, event) {
       // thumbnail: { url:'https://d3nn82uaxijpm6.cloudfront.net/favicon-32x32.png' },
       fields: [
         { name: '🔗 *strava_login', value: '-> Đăng nhập Strava để kết nối tài khoản', inline: false },
-        { name: '📋 *strava_myactivity', value: '-> Xem danh sách hoạt động gần đây của bạn', inline: false },
-        { name: '🏆 *strava_ranking', value: '-> Xem bảng xếp hạng top 5 quãng đường dài nhất', inline: false },
+        { name: '🔐 *strava_register', value: '-> Đăng ký vào group của Strava - NCC Sport ( cho user không dùng Strava )', inline: false },
+        { name: '📋 *strava_myactivity', value: '-> Xem danh sách 10 hoạt động gần đây của bạn', inline: false },
+        { name: '🏆 *strava_ranking', value: '-> Xem bảng xếp hạng top 5 quãng đường dài nhất cho đến thời điểm hiện tại', inline: false },
+        { name: '📊 *strava_report', value: '-> Xem báo cáo hoạt động theo các loại thể thao và khoảng thời gian(ngày/tuần/tháng/năm)', inline: false },
         { name: '📝 *strava_daily', value: '-> Nhập hoạt động manual cho Strava', inline: false },
-        { name: '🔐 *strava_register', value: '-> Đăng ký vào group của Strava ( cho user không dùng Strava )', inline: false },
         { name: '❓ *strava_help', value: '-> Xem hướng dẫn các lệnh', inline: false }
       ],
       timestamp: new Date().toISOString(),

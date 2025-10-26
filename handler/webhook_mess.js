@@ -9,6 +9,9 @@ module.exports = async function sendStravaActivityToChannel(client, activity, ch
     if (activity.photos && Array.isArray(activity.photos) && activity.photos.length > 0 && activity.photos[0]) {
         thumbnailObj = { url: activity.photos[0] };
     }
+    else{
+        thumbnailObj = { url: activity.avatar };
+    }
 
     let imageObj = {};
     let mapField = {};
@@ -22,10 +25,10 @@ module.exports = async function sendStravaActivityToChannel(client, activity, ch
 
     const embed = {
         color: "#f39c12",
-        title: `🚴 Hoạt động mới của ${activity.username} -- Link hoạt động`,
+        title: `🚴 Link hoạt động mới của ${activity.username}`,
         url: activity.strava_url,
         author: {
-            name: activity.username + "'s profile in Strava",
+            name: activity.username + "'s link profile in Strava",
             icon_url: activity.avatar,
             url: activity.strava_profile_url || activity.strava_url,
         },

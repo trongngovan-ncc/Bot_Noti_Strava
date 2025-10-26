@@ -12,6 +12,7 @@ const handleRegister = require("./commands/register");
 const handleReportFilter = require("./commands/report_filter");
 const submitManualActivity = require('./handler/activity_manual');
 const viewReportActivity = require('./handler/report');
+const filterCommand = require('./middleware/filterCommand');
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -28,6 +29,7 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
 
 
 (async () => {
+
   const client = new MezonClient({ botId: BOT_ID, token: BOT_TOKEN});
   await client.login();
   // startRankingCron(client);
@@ -45,33 +47,37 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
     const text = event?.content?.t?.toLowerCase();
     if (!text) return;
 
+
     if (text === "*strava_help") {
+      if (!await filterCommand(client, event)) return;
       return handleHelp(client, event);
     }
     if (text === "*strava_login") {
+      if (!await filterCommand(client, event)) return;
       return handleLogin(client, event);
     }
     if (text === "*strava_myactivity") {
+      if (!await filterCommand(client, event)) return;
       return handleMyActivity(client, event);
     }
     if (text === "*strava_ranking") {
+      if (!await filterCommand(client, event)) return;
       return handleRanking(client, event);
     }
 
     if(text === "*strava_daily") {
+      if (!await filterCommand(client, event)) return;
       return handleDailyLog(client, event);
     }
 
     if(text === "*strava_register"){
+      if (!await filterCommand(client, event)) return;
       return handleRegister(client, event);
     }
     
     if(text === "*strava_report"){
+      if (!await filterCommand(client, event)) return;
       return handleReportFilter(client, event);
-    }
-
-    if(text === "*test"){
-     return handleTest(client, event);
     }
     
   });
