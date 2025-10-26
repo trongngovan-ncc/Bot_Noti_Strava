@@ -164,9 +164,17 @@ function createStravaRouter(client) {
             return;
           }
           if (aspect_type === "delete") {
-            db.run("UPDATE activities SET deleted = 1 WHERE activity_id = ?", [
-              String(object_id),
-            ]);
+            db.run(
+              "DELETE FROM activities WHERE activity_id = ?",
+              [String(object_id)],
+              (delErr) => {
+                if (delErr) {
+                  console.error("Error deleting activity:", delErr);
+                } else {
+                  console.log("Deleted activity:", object_id);
+                }
+              }
+            );
             return;
           }
           db.get(
