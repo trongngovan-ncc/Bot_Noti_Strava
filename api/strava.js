@@ -142,8 +142,8 @@ function createStravaRouter(client) {
   });
 
   router.post("/webhook", express.json({ limit: "1mb" }), async (req, res) => {
-    console.log("Received Strava webhook event:", req.body);
     res.status(200).send("ok");
+    console.log("Received Strava webhook event:", req.body);
     setImmediate(() => {
       const token = req.query.token;
       if (token && token !== process.env.WEBHOOK_SECRET_TOKEN) {
@@ -308,7 +308,7 @@ function createStravaRouter(client) {
 
             try {
               const client = clientGlobal;
-              const CHANNEL_ID = "1967169865718435840";
+              const CHANNEL_ID = "1978358966857502720";
               const activityPhotos = [];
               if (data.photos) {
                 if (data.photos.primary && data.photos.primary.urls) {

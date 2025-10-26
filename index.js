@@ -1,4 +1,4 @@
-const startRankingCron = require('./handler/cronjob');
+// const startRankingCron = require('./handler/cronjob');
 require('dotenv').config();
 const express = require('express');
 const { MezonClient } = require('mezon-sdk');
@@ -30,7 +30,7 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
 (async () => {
   const client = new MezonClient({ botId: BOT_ID, token: BOT_TOKEN});
   await client.login();
-  startRankingCron(client);
+  // startRankingCron(client);
   client.onMessageButtonClicked(async (ev) => {
     const buttonId = ev.button_id || '';
     if (buttonId.startsWith('button-submit-') || buttonId.startsWith('button-cancel-')) {
