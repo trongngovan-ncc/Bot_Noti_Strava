@@ -84,7 +84,7 @@ module.exports = async function viewReportActivity(client, ev) {
 
       db.all(query, params, async (err, rows) => {
         if (err) {
-          // await message.update({ t: `❌ Lỗi truy vấn thống kê: ${err.message}` });
+          await message.update({ t: `❌ Lỗi truy vấn thống kê: ${err.message}` });
           db.close();
           return;
         }
