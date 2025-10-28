@@ -316,7 +316,7 @@ function createStravaRouter(client) {
 
             try {
               const client = clientGlobal;
-              const CHANNEL_ID = "1978358966857502720";
+              const CHANNEL_ID = "1832748899169734656";
               const activityPhotos = [];
               if (data.photos) {
                 if (data.photos.primary && data.photos.primary.urls) {
