@@ -15,13 +15,13 @@ module.exports = async function filterCommand(client, event) {
   const channel = await client.channels.fetch(event.channel_id);
   const message = await channel.messages.fetch(event.message_id);
   const clanId = event.clan_id;
-  if(!clanId){
-    await message.reply({ t: 'Không hỗ trợ DM' });
-    return false;
-  }else if(clanId == "0"){
-    await message.reply({ t: 'Không hỗ trợ DM' });
-    return false;
-  }
+  // if(!clanId){
+  //   await message.reply({ t: 'Không hỗ trợ DM' });
+  //   return false;
+  // }else if(clanId == "0"){
+  //   await message.reply({ t: 'Không hỗ trợ DM' });
+  //   return false;
+  // }
   if(!ALLOWED_CLANS.includes(clanId)){
     await message.reply({ t: 'Lệnh này chỉ được phép sử dụng trong Clan Komu!' });
     return false;

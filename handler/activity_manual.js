@@ -28,16 +28,23 @@ module.exports = async function submitManualActivity(client, ev) {
 
   const channel = await client.channels.fetch(channelId);
   const message = await channel.messages.fetch(messageId);
+  const mezon_user_id = ev.user_id || ev.userId || ev.userID;
+  // console.log('Mezon User ID:', mezon_user_id);
+  // console.log('Form Data:', formData);
+  // console.log('buttonId:', buttonId);
+  if (!buttonId.endsWith(`-${mezon_user_id}`)) {
+      return;
+  }
 
   if (buttonId.startsWith('button-submit-')) {
     if (missing.length > 0) {
-      await message.update({
-        t: `❌ Thiếu thông tin: ${missing.join(', ')}. Vui lòng nhập đầy đủ.`
-      });
+      // await message.update({
+      //   t: `❌ Thiếu thông tin: ${missing.join(', ')}. Vui lòng nhập đầy đủ.`
+      // });
       return;
     }
 
-      const mezon_user_id = ev.user_id || ev.userId || ev.userID;
+
       if (!mezon_user_id) {
         await message.update({
           t: `❌ Không xác định được user. Vui lòng thử lại.`

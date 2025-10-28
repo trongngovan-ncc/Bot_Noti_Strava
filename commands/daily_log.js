@@ -1,6 +1,7 @@
 module.exports = async function handleDailyLog(client, event) {
     const { EButtonMessageStyle, EMessageComponentType } = require('mezon-sdk');
     const messageid = event.message_id;
+    const user_id = event.sender_id;
     const embed = [
       {
         color: 0x00bfff,
@@ -15,7 +16,7 @@ module.exports = async function handleDailyLog(client, event) {
             name: 'Tên hoạt động:',
             value: '',
             inputs: {
-              id: `input-name-${messageid}`,
+              id: `input-name-${messageid}-${user_id}`,
               type: EMessageComponentType.INPUT,
               component: {
                 placeholder: 'Nhập tên hoạt động...',
@@ -29,7 +30,7 @@ module.exports = async function handleDailyLog(client, event) {
             name: 'Loại hoạt động:',
             value: '',
             inputs: {
-              id: `input-type-${messageid}`,
+              id: `input-type-${messageid}-${user_id}`,
               type: EMessageComponentType.SELECT,
               component: {
                 options: [
@@ -52,7 +53,7 @@ module.exports = async function handleDailyLog(client, event) {
             name: 'Thời gian (phút):',
             value: '',
             inputs: {
-              id: `input-time-${messageid}`,
+              id: `input-time-${messageid}-${user_id}`,
               type: EMessageComponentType.INPUT,
               component: {
                 placeholder: 'Nhập thời gian...',
@@ -67,7 +68,7 @@ module.exports = async function handleDailyLog(client, event) {
             name: 'Khoảng cách (km):',
             value: '',
             inputs: {
-              id: `input-distance-${messageid}`,
+              id: `input-distance-${messageid}-${user_id}`,
               type: EMessageComponentType.INPUT,
               component: {
                 placeholder: 'Nhập khoảng cách...',
@@ -91,7 +92,7 @@ module.exports = async function handleDailyLog(client, event) {
       {
         components: [
           {
-            id: `button-cancel-${messageid}`,
+            id: `button-cancel-${messageid}-${user_id}`,
             type: EMessageComponentType.BUTTON,
             component: {
               label: 'Cancel',
@@ -99,7 +100,7 @@ module.exports = async function handleDailyLog(client, event) {
             }
           },
           {
-            id: `button-submit-${messageid}`,
+            id: `button-submit-${messageid}-${user_id}`,
             type: EMessageComponentType.BUTTON,
             component: {
               label: 'Submit',
