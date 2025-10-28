@@ -27,11 +27,11 @@ module.exports = async function filterCommand(client, event) {
     return false;
   }
 
-  const channelId = event.channel_id;
-  if(!ALLOWED_CHANNELS.includes(channelId)){
-    await message.reply({ t: 'Lệnh này chỉ được phép sử dụng trong kênh thể thao!' });
-    return false;
-  }
+  // const channelId = event.channel_id;
+  // if(!ALLOWED_CHANNELS.includes(channelId)){
+  //   await message.reply({ t: 'Lệnh này chỉ được phép sử dụng trong kênh thể thao!' });
+  //   return false;
+  // }
 
   return true;
 }

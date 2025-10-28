@@ -15,6 +15,7 @@ module.exports = async function viewReportActivity(client, ev) {
   }
   const timeKey = Object.keys(formData).find(k => k.startsWith('filter-report-time'));
   const typeKey = Object.keys(formData).find(k => k.startsWith('filter-report-type'));
+  const sortKey = Object.keys(formData).find(k => k.startsWith('filter-report-sort'));
 
 
   const channel = await client.channels.fetch(channelId);
@@ -28,6 +29,7 @@ module.exports = async function viewReportActivity(client, ev) {
 
       const time_range = formData[timeKey];
       const sport_type = formData[typeKey];
+      const sort_type = formData[sortKey];
       let start_time, end_time;
       const now = new Date();
       switch (time_range) {
@@ -67,7 +69,14 @@ module.exports = async function viewReportActivity(client, ev) {
         params.push(start_time.toISOString());
         params.push(end_time.toISOString());
       }
-      query += ' GROUP BY a.mezon_user_id, a.athlete_name, a.strava_athlete_id, a.mezon_avatar ORDER BY total_distance DESC';
+      query += ' GROUP BY a.mezon_user_id, a.athlete_name, a.strava_athlete_id, a.mezon_avatar';
+      let orderBy = 'total_distance DESC';
+      if (sort_type === 'Duration') {
+        orderBy = 'total_duration DESC';
+      } else if (sort_type === 'Number') {
+        orderBy = 'total_activities DESC';
+      }
+      query += ` ORDER BY ${orderBy}`;
 
       db.all(query, params, async (err, rows) => {
         if (err) {
@@ -83,7 +92,7 @@ module.exports = async function viewReportActivity(client, ev) {
         const embed = [
           {
             color: 0x00bfff,
-            title: `📊 Báo cáo hoạt động Strava (${sport_type || 'All'}) - ${time_range}`,
+            title: `📊 Báo cáo hoạt động Strava (${sport_type || 'All'}) - ${time_range} - Xếp hạng theo ${sort_type}`,
             description: rows.map((row, idx) => [
               `${idx + 1} ${row.athlete_name}`,
               `🏅 Tổng quãng đường: ${(row.total_distance/1000).toFixed(2)} km`,
@@ -97,38 +106,8 @@ module.exports = async function viewReportActivity(client, ev) {
             }
           }
         ];
-        const components = [
-            {
-                components: [
-                {
-                    id: `button-sort-distance-${messageId}`,
-                    type: EMessageComponentType.BUTTON,
-                    component: {
-                    label: 'Sort by Distance',
-                    style: EButtonMessageStyle.SUCCESS
-                    }
-                },
-                {
-                    id: `button-sort-duration-${messageId}`,
-                    type: EMessageComponentType.BUTTON,
-                    component: {
-                    label: 'Sort by Duration',
-                    style: EButtonMessageStyle.SUCCESS
-                    }
-                },
-                {
-                    id: `button-sort-number-${messageId}`,
-                    type: EMessageComponentType.BUTTON,
-                    component: {
-                    label: 'Sort by Number',
-                    style: EButtonMessageStyle.SUCCESS
-                    }
-                }
-                ]
-            }
-        ];
 
-        await message.update({ embed, components });
+        await message.update({ embed });
         db.close();
       });
   } else if (buttonId.startsWith('button-cancel-')) {

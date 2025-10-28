@@ -9,7 +9,7 @@ module.exports = async function handleReportFilter(client, event) {
           name: event.display_name || event.username || "Mezon User",
           icon_url: event.avatar,
         },
-        thumbnail: { url: event.avatar || '' },
+        thumbnail: { url: 'https://d3nn82uaxijpm6.cloudfront.net/favicon-32x32.png'},
         fields: [
           {
             name: 'Loại hoạt động:',
@@ -57,7 +57,24 @@ module.exports = async function handleReportFilter(client, event) {
                 valueSelected: { label: 'Từ trước đến nay', value: 'All' }
               }
             }
-          }
+          },
+          {
+            name: 'Xếp hạng theo:',
+            value: '',
+            inputs: {
+              id: `filter-report-sort-${messageid}`,
+              type: EMessageComponentType.SELECT,
+              component: {
+                options: [
+                  {label: 'Tổng quãng đường', value: 'Distance'},
+                  { label: 'Tổng thời gian', value: 'Duration' },
+                  { label: 'Tổng số lần', value: 'Number' }             
+                ],
+                required: true,
+                valueSelected: { label: 'Tổng quãng đường', value: 'Distance' }
+              }
+            }
+          },
         ],
         timestamp: new Date().toISOString(),
         footer: {
