@@ -55,22 +55,21 @@ module.exports = async function submitManualActivity(client, ev) {
       const dbPath = path.join(__dirname, '../data/strava_bot.db');
       const db = new sqlite3.Database(dbPath);
       const getAthleteInfo = () => new Promise((resolve, reject) => {
-        db.get('SELECT strava_athlete_id, mezon_avatar, athlete_name FROM athletes WHERE mezon_user_id = ?', [mezon_user_id], (err, row) => {
+        db.get('SELECT mezon_avatar, athlete_name FROM athletes WHERE mezon_user_id = ?', [mezon_user_id], (err, row) => {
           if (err) return reject(err);
           resolve(row || {});
         });
       });
-      let strava_athlete_id, mezon_avatar, athlete_name;
+      let mezon_avatar, athlete_name;
       try {
         const info = await getAthleteInfo();
-        if (!info || !info.strava_athlete_id) {
+        if (!info || !info.athlete_name) {
           await message.update({
             t: `❌ Bạn chưa đăng ký hoặc login vào Group Strava trên Mezon. Vui lòng dùng lệnh *strava_register (nếu không có tài khoản Strava) hoặc *strava_login (nếu có tài khoản) trước khi nhập hoạt động.`
           });
           db.close();
           return;
         }
-        strava_athlete_id = info.strava_athlete_id;
         mezon_avatar = info.mezon_avatar;
         athlete_name = info.athlete_name;
       } catch (e) {
@@ -91,8 +90,8 @@ module.exports = async function submitManualActivity(client, ev) {
 
       const insertActivity = () => new Promise((resolve, reject) => {
         db.run(
-          'INSERT INTO activities (activity_id, source, strava_athlete_id, sport_type, activity_name, distance_m, duration_s, start_date_local) VALUES (?, ?, ?, ?, ?, ?, ?, datetime("now"))',
-          [activity_id, 'manual', strava_athlete_id, sport_type, activity_name, distance_m, duration_s],
+          'INSERT INTO activities (activity_id, source, mezon_user_id, sport_type, activity_name, distance_m, duration_s, start_date_local) VALUES (?, ?, ?, ?, ?, ?, ?, datetime("now"))',
+          [activity_id, 'manual', mezon_user_id, sport_type, activity_name, distance_m, duration_s],
           function(err) {
             if (err) return reject(err);
             resolve();

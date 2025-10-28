@@ -20,9 +20,8 @@ module.exports = async function handleMyActivity(client, event) {
       const username = userRow.athlete_name;
       db.all(
         `SELECT a.activity_id, a.activity_name, a.sport_type, a.distance_m, a.duration_s, a.start_date_local
-         FROM athletes ath
-         JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
-         WHERE ath.mezon_user_id = ? AND (a.deleted IS NULL OR a.deleted = 0)
+         FROM activities a
+         WHERE a.mezon_user_id = ? AND (a.deleted IS NULL OR a.deleted = 0)
          ORDER BY a.start_date_local DESC LIMIT 10`,
         [mezonUserId],
         async (err, rows) => {

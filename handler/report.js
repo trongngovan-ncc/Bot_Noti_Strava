@@ -59,10 +59,10 @@ module.exports = async function viewReportActivity(client, ev) {
           end_time = null;
       }
 
-      let query = `SELECT a.mezon_user_id, a.athlete_name, a.strava_athlete_id, a.mezon_avatar, SUM(act.distance_m) as total_distance, SUM(act.duration_s) as total_duration, COUNT(act.activity_id) as total_activities
-                   FROM athletes a
-                   JOIN activities act ON a.strava_athlete_id = act.strava_athlete_id
-                   WHERE act.deleted IS NULL OR act.deleted = 0`;
+  let query = `SELECT a.mezon_user_id, a.athlete_name, a.strava_athlete_id, a.mezon_avatar, SUM(act.distance_m) as total_distance, SUM(act.duration_s) as total_duration, COUNT(act.activity_id) as total_activities
+       FROM athletes a
+       JOIN activities act ON a.mezon_user_id = act.mezon_user_id
+       WHERE act.deleted IS NULL OR act.deleted = 0`;
       let params = [];
       if (sport_type && sport_type !== 'All') {
         query += ' AND act.sport_type = ?';
@@ -84,7 +84,7 @@ module.exports = async function viewReportActivity(client, ev) {
 
       db.all(query, params, async (err, rows) => {
         if (err) {
-          await message.update({ t: `❌ Lỗi truy vấn thống kê: ${err.message}` });
+          // await message.update({ t: `❌ Lỗi truy vấn thống kê: ${err.message}` });
           db.close();
           return;
         }

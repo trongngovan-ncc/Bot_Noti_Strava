@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+const SECRET_KEY = process.env.JWT_SECRET;
 
 
 function authenticateToken(req, res, next) {
@@ -16,7 +16,7 @@ function authenticateToken(req, res, next) {
 
 
 function generateToken(payload) {
-    return jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
+    return jwt.sign(payload, SECRET_KEY, { expiresIn: '3m' });
 }
 
 module.exports = {

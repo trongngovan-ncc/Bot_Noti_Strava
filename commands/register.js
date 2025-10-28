@@ -18,21 +18,20 @@ module.exports = async function handleRegister(client, event) {
         return;
       }
       if (row && row.strava_athlete_id) {
-        message.reply({ t: `⚠️ Tài khoản này đã đăng ký trước đó. Bạn không cần đăng ký lại!` });
+        message.reply({ t: `⚠️ Tài khoản này đã đăng ký trước đó, hoặc nếu muốn đổi sang tài khoản sử dụng app Strava, vui lòng *strava_login!` });
         db.close();
         return;
       }
 
-      const strava_athlete_id = Date.now() + Math.floor(Math.random() * 1000000);
       db.run(
         `INSERT INTO athletes (strava_athlete_id, mezon_user_id, athlete_name, mezon_avatar, created_at)
         VALUES (?, ?, ?, ?, datetime('now'))`,
-        [strava_athlete_id, mezonUserId, athlete_name, mezon_avatar],
+        [null, mezonUserId, athlete_name, mezon_avatar],
         function(err2) {
           if (err2) {
             message.reply({ t: `❌ Đăng ký thất bại: ${err2.message}` });
           } else {
-            message.reply({ t: `✅ Đăng ký thành công! Bạn đã có thể sử dụng các tính năng của bot.` });
+            message.reply({ t: `✅ Đăng ký thành công cho user không dùng app Strava! Bạn đã có thể sử dụng các tính năng của bot.` });
           }
           db.close();
         }

@@ -55,7 +55,7 @@ function createStravaRouter(client) {
     }
 
     const jwt = require("jsonwebtoken");
-    const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
+    const SECRET_KEY = process.env.JWT_SECRET;
     let mezon_user_id = null;
     let mezon_avatar = "";
     let decodedToken = "";
@@ -68,7 +68,7 @@ function createStravaRouter(client) {
       mezon_avatar = decoded.mezon_avatar || "";
     } catch (err) {
       console.error("Invalid JWT token in state:", err);
-      return res.status(403).send("Invalid token in state");
+      return res.status(403).send("Session login&authorize expired. Please try again with *strava_login.");
     }
     try {
       const tokenRes = await axios.post("https://www.strava.com/oauth/token", {
@@ -81,11 +81,11 @@ function createStravaRouter(client) {
         tokenRes.data;
 
       db.run(
-        `INSERT OR REPLACE INTO athletes (strava_athlete_id, mezon_user_id, access_token, refresh_token, token_expires_at, athlete_name, mezon_avatar, created_at)
+        `INSERT OR REPLACE INTO athletes ( mezon_user_id, strava_athlete_id, access_token, refresh_token, token_expires_at, athlete_name, mezon_avatar, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
         [
-          athlete.id,
           mezon_user_id,
+          athlete.id,
           access_token,
           refresh_token,
           new Date(expires_at * 1000).toISOString(),
@@ -104,13 +104,13 @@ function createStravaRouter(client) {
               process.env.WEBHOOK_SECRET_TOKEN
             );
             if (webhookRes.error) {
-              webhookMsg = `<p>Đăng ký webhook Strava thất bại: ${JSON.stringify(
+              webhookMsg = `<p>Strava webhook registration failed: ${JSON.stringify(
                 webhookRes.message
               )}</p>`;
             } else if (webhookRes.already) {
-              webhookMsg = "<p>Webhook Strava đã được đăng ký trước đó.</p>";
+              webhookMsg = "<p>Strava webhook already registered.</p>";
             } else if (webhookRes.created) {
-              webhookMsg = "<p>Đăng ký webhook Strava thành công!</p>";
+              webhookMsg = "<p>Strava webhook registered successfully!</p>";
             }
           }
           const fs = require("fs");
@@ -123,7 +123,7 @@ function createStravaRouter(client) {
 
           html = html.replace(
             '<p id="athlete-info"></p>',
-            `<p>Tài khoản Strava của <strong>${athlete.firstname} ${athlete.lastname}</strong> đã được kết nối.</p>`
+            `<p>Strava account of <strong>${athlete.firstname} ${athlete.lastname}</strong> has been connected.</p>`
           );
           html = html.replace('<div id="webhook-msg"></div>', webhookMsg || "");
           res.send(html);
@@ -370,11 +370,11 @@ function createStravaRouter(client) {
 
               db.run(
                 `INSERT OR REPLACE INTO activities (
-            activity_id, source, strava_athlete_id, sport_type, activity_name, distance_m, duration_s, start_date_local, timezone, private, deleted, created_at, photo, map
+            activity_id, source, mezon_user_id, sport_type, activity_name, distance_m, duration_s, start_date_local, timezone, private, deleted, created_at, photo, map
           ) VALUES (?, 'strava', ?, ?, ?, ?, ?, ?, ?, ?, 0, datetime('now'), ?, ?)`,
                 [
                   String(data.id),
-                  athlete.strava_athlete_id,
+                  athlete.mezon_user_id,
                   data.type,
                   data.name,
                   data.distance,

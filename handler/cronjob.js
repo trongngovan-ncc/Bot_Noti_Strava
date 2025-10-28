@@ -21,7 +21,7 @@ module.exports = function startRankingCron(client) {
       const yesterdayStr = yesterdayVN.toISOString().split("T")[0];
       const query = `SELECT act.sport_type, GROUP_CONCAT(DISTINCT ath.athlete_name) as athletes, COUNT(act.activity_id) as total_acts
                   FROM activities act
-                  JOIN athletes ath ON act.strava_athlete_id = ath.strava_athlete_id
+                  JOIN athletes ath ON act.mezon_user_id = ath.mezon_user_id
                   WHERE (act.deleted IS NULL OR act.deleted = 0)
                     AND date(act.start_date_local) = ?
                   GROUP BY act.sport_type

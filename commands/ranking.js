@@ -8,13 +8,13 @@ module.exports = async function handleRanking(client, event) {
   const message = await channel.messages.fetch(event.message_id);
 
   db.all(
-    `SELECT ath.strava_athlete_id, ath.athlete_name, ath.mezon_avatar,
+    `SELECT ath.mezon_user_id, ath.athlete_name, ath.mezon_avatar,
             SUM(a.distance_m) as total_distance,
             SUM(a.duration_s) as total_duration,
             COUNT(a.activity_id) as total_acts
-     FROM athletes ath JOIN activities a ON ath.strava_athlete_id = a.strava_athlete_id
+     FROM athletes ath JOIN activities a ON ath.mezon_user_id = a.mezon_user_id
      WHERE (a.deleted IS NULL OR a.deleted = 0)
-     GROUP BY ath.strava_athlete_id
+     GROUP BY ath.mezon_user_id
      ORDER BY total_distance DESC
      LIMIT 5`,
     [],
