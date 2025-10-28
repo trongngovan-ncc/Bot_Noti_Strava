@@ -20,6 +20,10 @@ module.exports = async function viewReportActivity(client, ev) {
 
   const channel = await client.channels.fetch(channelId);
   const message = await channel.messages.fetch(messageId);
+  const mezon_user_id = ev.user_id || ev.userId || ev.userID;
+  if (!buttonId.endsWith(`-${mezon_user_id}`)) {
+      return;
+  }
 
   if (buttonId.startsWith('button-report-view')) {
 

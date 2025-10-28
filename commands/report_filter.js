@@ -1,6 +1,7 @@
 module.exports = async function handleReportFilter(client, event) {
     const { EButtonMessageStyle, EMessageComponentType } = require('mezon-sdk');
     const messageid = event.message_id;
+    const user_id = event.sender_id;
     const embed = [
       {
         color: 0x00bfff,
@@ -88,7 +89,7 @@ module.exports = async function handleReportFilter(client, event) {
       {
         components: [
           {
-            id: `button-report-cancel-${messageid}`,
+            id: `button-report-cancel-${messageid}-${user_id}`,
             type: EMessageComponentType.BUTTON,
             component: {
               label: 'Cancel',
@@ -96,7 +97,7 @@ module.exports = async function handleReportFilter(client, event) {
             }
           },
           {
-            id: `button-report-view-${messageid}`,
+            id: `button-report-view-${messageid}-${user_id}`,
             type: EMessageComponentType.BUTTON,
             component: {
               label: 'View Report',
