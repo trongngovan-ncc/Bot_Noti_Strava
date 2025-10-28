@@ -26,7 +26,17 @@ module.exports = async function handleLogin(client, event) {
 				}
 			}
 		];
-		await message.reply({ embed });
+		try{
+			const CLAN_ID = '1779484504377790464';
+			const clan = await client.clans.fetch(CLAN_ID);
+			const userObj = await clan.users.fetch(mezonUserId);
+			await userObj.sendDM({ embed });
+			await message.reply({ t: 'Done, check your DM for the login link.' });
+		} catch (error) {
+			console.error('Error sending DM:', error);
+		}
+		
+		
   } catch (err) {
     console.error(err);
   }
