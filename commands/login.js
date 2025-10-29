@@ -18,7 +18,7 @@ module.exports = async function handleLogin(client, event) {
 					icon_url: mezon_avatar,
 				},
 				thumbnail: { url: mezon_avatar || '' },
-				description: `⚠️ Lưu ý: Không nên share link cho bất cứ ai bởi nó chỉ liên kết với tài khoản mezon của bạn!`,
+				description: `⚠️ Lưu ý: Link chỉ tồn tại 5 phút. Không nên share link cho bất cứ ai bởi nó chỉ liên kết với tài khoản mezon của bạn!`,
 				timestamp: new Date().toISOString(),
 				footer: {
 					text: "Powered by Mezon Bot Strava",
