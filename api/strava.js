@@ -316,7 +316,7 @@ function createStravaRouter(client) {
 
             try {
               const client = clientGlobal;
-              const CHANNEL_ID = "1832748899169734656";
+              const CHANNEL_ID = process.env.CHANNEL_NOTI_WEBHOOK;
               const activityPhotos = [];
               if (data.photos) {
                 if (data.photos.primary && data.photos.primary.urls) {

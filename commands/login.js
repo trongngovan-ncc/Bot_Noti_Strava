@@ -27,7 +27,7 @@ module.exports = async function handleLogin(client, event) {
 			}
 		];
 		try{
-			const CLAN_ID = '1779484504377790464';
+			const CLAN_ID = process.env.CLAN_SEND_DM;
 			const clan = await client.clans.fetch(CLAN_ID);
 			const userObj = await clan.users.fetch(mezonUserId);
 			await userObj.sendDM({ embed });

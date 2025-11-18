@@ -76,6 +76,23 @@ module.exports = async function handleReportFilter(client, event) {
               }
             }
           },
+          {
+            name: 'Limit:',
+            value: '',
+            inputs: {
+              id: `filter-report-limit-${messageid}`,
+              type: EMessageComponentType.SELECT,
+              component: {
+                options: [
+                  {label: '5 người', value: '5'},
+                  { label: '10 người', value: '10' },
+                  { label: '15 người', value: '15' }             
+                ],
+                required: true,
+                valueSelected: { label: '5 người', value: '5' }
+              }
+            }
+          },
         ],
         timestamp: new Date().toISOString(),
         footer: {

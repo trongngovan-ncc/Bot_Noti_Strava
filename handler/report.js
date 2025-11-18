@@ -1,6 +1,37 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const { EButtonMessageStyle, EMessageComponentType } = require('mezon-sdk');
+const SORT_TYPE_LABELS = {
+  Distance: 'Tổng quãng đường',
+  Duration: 'Tổng thời gian',
+  Number: 'Số hoạt động'
+};
+
+const TIME_RANGE_LABELS = {
+  'Today': 'Hôm nay',
+  'Yesterday': 'Cách đây 1 ngày',
+  'This Week': 'Tuần này',
+  'Last Week': 'Cách đây 1 tuần',
+  'This Month': 'Tháng này',
+  'Last Month': 'Cách đây 1 tháng',
+  'This Year': 'Năm nay',
+  'Last Year': 'Cách đây 1 năm',
+  'All': 'Từ trước đến nay'
+};
+
+const SPORT_TYPE_LABELS = {
+  All: 'Tất cả bộ môn',
+  Run: 'Chạy bộ',
+  Bike: 'Đạp xe',
+  Swim: 'Bơi lội',
+  Walk: 'Đi bộ',
+  Football: 'Bóng đá',
+  Hiking: 'Leo núi',
+  Badminton: 'Cầu lông',
+  Tennis: 'Quần vợt',
+  Pickleball: 'Pickleball'
+};
+
 module.exports = async function viewReportActivity(client, ev) {
   const buttonId = ev.button_id || '';
   const messageId = ev.message_id;
@@ -16,6 +47,7 @@ module.exports = async function viewReportActivity(client, ev) {
   const timeKey = Object.keys(formData).find(k => k.startsWith('filter-report-time'));
   const typeKey = Object.keys(formData).find(k => k.startsWith('filter-report-type'));
   const sortKey = Object.keys(formData).find(k => k.startsWith('filter-report-sort'));
+  const limitKey = Object.keys(formData).find(k => k.startsWith('filter-report-limit'));
 
 
   const channel = await client.channels.fetch(channelId);
@@ -34,6 +66,13 @@ module.exports = async function viewReportActivity(client, ev) {
       const time_range = formData[timeKey];
       const sport_type = formData[typeKey];
       const sort_type = formData[sortKey];
+      const limit_count = parseInt(formData[limitKey]) || 5;
+
+      // Không cho xếp hạng theo quãng đường với các bộ môn không phù hợp
+      const noDistanceSports = ['Football', 'Hiking', 'Badminton', 'Tennis', 'Pickleball'];
+      if (noDistanceSports.includes(sport_type) && sort_type === 'Distance') {
+        return;
+      }
       let start_time, end_time;
       const now = new Date();
       switch (time_range) {
@@ -80,7 +119,8 @@ module.exports = async function viewReportActivity(client, ev) {
       } else if (sort_type === 'Number') {
         orderBy = 'total_activities DESC';
       }
-      query += ` ORDER BY ${orderBy}`;
+      query += ` ORDER BY ${orderBy} LIMIT ?`;
+      params.push(limit_count);
 
       db.all(query, params, async (err, rows) => {
         if (err) {
@@ -93,25 +133,21 @@ module.exports = async function viewReportActivity(client, ev) {
           db.close();
           return;
         }
-        const embed = [
-          {
-            color: 0x00bfff,
-            title: `📊 Báo cáo hoạt động Strava (${sport_type || 'All'}) - ${time_range} - Xếp hạng theo ${sort_type}`,
-            description: rows.map((row, idx) => [
-              `${idx + 1} ${row.athlete_name}`,
-              `🏅 Tổng quãng đường: ${(row.total_distance/1000).toFixed(2)} km`,
-              `⏱️ Tổng thời gian: ${(row.total_duration/60).toFixed(1)} phút`,
-              `🔢 Số hoạt động: ${row.total_activities}`
-            ].join('\n')).join('\n\n'),
-            timestamp: new Date().toISOString(),
-            footer: {
-              text: 'Powered by Mezon Bot Strava',
-              icon_url: 'https://d3nn82uaxijpm6.cloudfront.net/favicon-32x32.png'
-            }
-          }
-        ];
-
-        await message.update({ embed });
+        const cupIcons = ['🥇', '🥈', '🥉', '🏅', '🏅'];
+        const embeds = rows.map((row, idx) => ({
+          color: '#00bfff',
+          title: `${cupIcons[idx] || ''} Top ${idx+1} - ${row.athlete_name}`,
+          url: row.strava_athlete_id ? `https://www.strava.com/athletes/${row.strava_athlete_id}` : undefined,
+          description:
+            `🏅 Tổng quãng đường: ${(row.total_distance/1000).toFixed(2)} km\n` +
+            `⏱️ Tổng thời gian: ${(row.total_duration/60).toFixed(1)} phút\n` +
+            `🔢 Số hoạt động: ${row.total_activities}`,
+          thumbnail: { url: row.mezon_avatar || '' },
+        }));
+        await message.update({
+          t: `📊 BÁO CÁO HOẠT ĐỘNG STRAVA (${SPORT_TYPE_LABELS[sport_type] || sport_type || 'Tất cả bộ môn'}) - ${TIME_RANGE_LABELS[time_range] || time_range || 'Từ trước đến này'} - Xếp hạng theo ${SORT_TYPE_LABELS[sort_type] || sort_type || 'Tổng quãng đường'}`,
+          embed: embeds
+        });
         db.close();
       });
   } else if (buttonId.startsWith('button-cancel-')) {

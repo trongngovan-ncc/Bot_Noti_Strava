@@ -9,13 +9,13 @@ module.exports = async function handleRanking(client, event) {
 
   db.all(
     `SELECT ath.mezon_user_id, ath.athlete_name, ath.mezon_avatar,
-            SUM(a.distance_m) as total_distance,
             SUM(a.duration_s) as total_duration,
-            COUNT(a.activity_id) as total_acts
+            COUNT(a.activity_id) as total_acts,
+            SUM(a.distance_m) as total_distance
      FROM athletes ath JOIN activities a ON ath.mezon_user_id = a.mezon_user_id
      WHERE (a.deleted IS NULL OR a.deleted = 0)
      GROUP BY ath.mezon_user_id
-     ORDER BY total_distance DESC
+     ORDER BY total_duration DESC, total_acts DESC
      LIMIT 5`,
     [],
     async (err, rows) => {
@@ -31,12 +31,12 @@ module.exports = async function handleRanking(client, event) {
         title: `${cupIcons[idx] || ''} Top ${idx+1} - ${row.athlete_name}`,
         url:  `https://www.strava.com/athletes/${row.strava_athlete_id}`,
         description:
-          `🏃 Tổng quãng đường: ${(row.total_distance/1000).toFixed(2)} km\n` +
           `⏱️ Tổng thời gian: ${(row.total_duration/60).toFixed(1)} phút\n` +
-          `🔢 Số lần hoạt động: ${row.total_acts}`,
+          `🔢 Số lần hoạt động: ${row.total_acts}\n` +
+          `🏃 Tổng quãng đường: ${(row.total_distance/1000).toFixed(2)} km`,
         thumbnail: { url: row.mezon_avatar || '' }
       }));
-      await message.reply({ t: '🏆 TOP 5 BẢNG XẾP HẠNG STRAVA ( Theo tổng quãng đường )', embed });
+      await message.reply({ t: '🏆 TOP 5 BẢNG XẾP HẠNG STRAVA (Theo tổng thời gian hoạt động)', embed });
       db.close();
     }
   );

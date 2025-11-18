@@ -1,19 +1,32 @@
+
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-module.exports = async function handleMyActivity(client, event) {
-  const mezonUserId = event.sender_id;
-  const dbPath = path.join(__dirname, '../data', 'strava_bot.db');
-  const db = new sqlite3.Database(dbPath);
+
+module.exports = async function viewStravaOrther(client, event) {
   const channel = await client.channels.fetch(event.channel_id);
   const message = await channel.messages.fetch(event.message_id);
-
-  db.get(
+  let referenceUserId;
+  if (event.references && event.references.length > 0) {
+      let refArr = event.references;
+      if (typeof refArr === 'string') {
+        try { refArr = JSON.parse(refArr); } catch {}
+      }
+      if (Array.isArray(refArr) && refArr.length > 0 && refArr[0].message_sender_id) {
+        referenceUserId = refArr[0].message_sender_id;
+      }
+   }
+   if(!referenceUserId){
+    return;
+   }
+   const dbPath = path.join(__dirname, '../data', 'strava_bot.db');
+   const db = new sqlite3.Database(dbPath);
+   db.get(
     `SELECT athlete_name, mezon_avatar FROM athletes WHERE mezon_user_id = ? LIMIT 1`,
-    [mezonUserId],
+    [referenceUserId],
     (err, userRow) => {
       if (err || !userRow) {
-        message.reply({ t: '🙁 Không tìm thấy thông tin tài khoản Strava.' });
+        message.reply({ t: '🙁 Người mà bạn reply chưa đăng ký vào group strava.' });
         db.close();
         return;
       }
@@ -24,7 +37,7 @@ module.exports = async function handleMyActivity(client, event) {
          FROM activities a
          WHERE a.mezon_user_id = ? AND (a.deleted IS NULL OR a.deleted = 0)
          ORDER BY a.start_date_local DESC LIMIT 10`,
-        [mezonUserId],
+        [referenceUserId],
         async (err, rows) => {
           if (err) {
             await message.reply({ t: '❌ Lỗi truy vấn hoạt động.' });
@@ -43,7 +56,7 @@ module.exports = async function handleMyActivity(client, event) {
           }).join('\n');
           const embed = {
             color: '#00bfff',
-            title: `🏃‍♂️ Top 10 hoạt động gần đây của ${username}`,
+            title: `🏃‍♂️ Bạn đang quan tâm đến hoạt động của ${username}`,
             author: {
               name: username,
               icon_url: avatar

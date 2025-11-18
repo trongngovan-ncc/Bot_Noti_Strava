@@ -1,10 +1,3 @@
 node_modules
 .env
-ssh.txt
-# Mezon cache
 /mezon-cache
-doc_development.txt
-/keys
-note.txt
-test.js
-test.py

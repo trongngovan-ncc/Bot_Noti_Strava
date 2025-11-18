@@ -1,5 +1,5 @@
-// const startRankingCron = require('./handler/cronjob');
 require('dotenv').config();
+const startRankingCron = require('./handler/cronjob');
 const express = require('express');
 const { MezonClient } = require('mezon-sdk');
 const registerHealthApi = require('./api/health');
@@ -12,6 +12,7 @@ const handleRegister = require("./commands/register");
 const handleReportFilter = require("./commands/report_filter");
 const submitManualActivity = require('./handler/activity_manual');
 const viewReportActivity = require('./handler/report');
+const viewStravaOrther = require('./commands/strava_orther');
 const filterCommand = require('./middleware/filterCommand');
 const axios = require('axios');
 const sqlite3 = require('sqlite3').verbose();
@@ -24,18 +25,23 @@ const APP_TOKEN = process.env.APPLICATION_TOKEN;
 
 const dbPath = path.join(__dirname, 'data', 'strava_bot.db');
 const db = new sqlite3.Database(dbPath);
-const BOT_TOKEN = process.env.APPLICATION_TOKEN_TEST;
-const BOT_ID = process.env.APPLICATION_ID_TEST;
+const BOT_TOKEN = process.env.APPLICATION_TOKEN;
+const BOT_ID = process.env.APPLICATION_ID;
 
 
 (async () => {
 
   const client = new MezonClient({ botId: BOT_ID, token: BOT_TOKEN});
-  await client.login();
-  // startRankingCron(client);
+  const session = await client.login();
+  // console.log('Bot logged in with session:', session);
+
+  startRankingCron(client);
+
+
   client.onMessageButtonClicked(async (ev) => {
     const buttonId = ev.button_id || '';
-    if (buttonId.startsWith('button-submit-') || buttonId.startsWith('button-cancel-')) {
+
+    if (buttonId.startsWith('button-submit-') || buttonId.startsWith('button-cancel-')) { 
       await submitManualActivity(client, ev);
     }
     if (buttonId.startsWith('button-report-view') || buttonId.startsWith('button-report-cancel') ) {
@@ -49,7 +55,7 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
 
 
     if (text === "*strava_help") {
-      if (!await filterCommand(client, event)) return;
+      // if (!await filterCommand(client, event)) return;
       return handleHelp(client, event);
     }
     if (text === "*strava_login") {
@@ -79,7 +85,12 @@ const BOT_ID = process.env.APPLICATION_ID_TEST;
       if (!await filterCommand(client, event)) return;
       return handleReportFilter(client, event);
     }
-    
+
+    if(text === "*strava"){
+      if (!await filterCommand(client, event)) return;
+      return viewStravaOrther(client, event);
+    }
+
   });
 
   const app = express();  
